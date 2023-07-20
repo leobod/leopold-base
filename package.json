@@ -1,0 +1,44 @@
+{
+  "name": "@esidecn/leopold-base",
+  "version": "1.0.0",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/lib/index.js",
+  "types": "./dist/lib/index.d.ts",
+  "scripts": {
+    "init": "tsc --init",
+    "build": "tsc --build"
+  },
+  "author": "leobod (leobod@eside.cn)",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.9",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "koa": "^2.13.4",
+    "koa-body": "^5.0.0",
+    "koa-compress": "^5.1.1",
+    "koa-cookies": "^3.1.0",
+    "koa-jwt": "^4.0.4",
+    "koa-log4": "^2.3.2",
+    "koa-mount": "^4.0.0",
+    "koa-router": "^12.0.0",
+    "koa-static": "^5.0.0",
+    "koa-view": "^2.1.4",
+    "md5": "^2.3.0",
+    "mime-types": "^2.1.35",
+    "mysql": "^2.18.1",
+    "node-uuid": "^1.4.8",
+    "nodemailer": "^6.9.3",
+    "qr-image": "^3.2.0",
+    "redis": "^4.3.1",
+    "svg-captcha": "^1.4.0",
+    "ws": "^8.9.0"
+  }
+}
