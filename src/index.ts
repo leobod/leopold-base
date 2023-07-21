@@ -8,8 +8,8 @@ import http from 'http';
 interface ApplicationConfigType {
   root?: string;
   port?: number;
-  path?: {
-    app?: string;
+  app_path?: {
+    api?: Array<any>;
     assets?: string;
     logs?: string;
     uploads?: string;
@@ -24,8 +24,10 @@ class Application {
   public server: Koa;
 
   constructor(config: ApplicationConfigType = {}) {
-    this.server = new Koa();
     this.loadConfig(config);
+    this.server = new Koa();
+    this.server.context.app = this.server.app = this;
+    this.server.context.config = this.config;
   }
 
   loadConfig(config: ApplicationConfigType) {
@@ -33,22 +35,23 @@ class Application {
     if (!this.config.root) {
       this.config.root = process.cwd();
     }
-    if (!this.config.path || !this.config.path.app) {
-      this.config.path.app = path.join(this.config.root, './www');
+    if (!this.config.app_path) {
+      this.config.app_path = {}
     }
-    if (!this.config.path || !this.config.path.assets) {
-      this.config.path.assets = path.join(this.config.root, './assets');
+    if (!this.config.app_path.api) {
+      this.config.app_path.api = []
     }
-
-    if (!this.config.path || !this.config.path.logs) {
-      this.config.path.logs = path.join(this.config.root, './logs');
+    if (!this.config.app_path.assets) {
+      this.config.app_path.assets = path.join(this.config.root, './assets');
     }
-
-    if (!this.config.path || !this.config.path.uploads) {
-      this.config.path.uploads = path.join(this.config.root, './uploads');
+    if (!this.config.app_path.logs) {
+      this.config.app_path.logs = path.join(this.config.root, './logs');
     }
-    if (!this.config.path || !this.config.path.web) {
-      this.config.path.web = path.join(this.config.root, './web');
+    if (!this.config.app_path.uploads) {
+      this.config.app_path.uploads = path.join(this.config.root, './uploads');
+    }
+    if (!this.config.app_path.web) {
+      this.config.app_path.web = path.join(this.config.root, './web');
     }
   }
 
