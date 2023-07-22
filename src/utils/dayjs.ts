@@ -1,24 +1,25 @@
-const dayjs = require("dayjs")
+import dayjs from 'dayjs'
 dayjs.locale('zh-cn')
+
+type DateInputType = Date | string
 
 /**
  * 日期格式化
  * @param d
  * @param format  YYYY/MM/DD HH:mm:ss
  */
-const formatDate = (d, format) => {
+const formatDate = (d: DateInputType, format: string) => {
   return dayjs(d).format(format)
 }
 
-const toDate = (d) => {
+const toDate = (d: DateInputType) => {
   return dayjs(d).toDate()
 }
 
-const getStartOfHour = (d, h = 'HH') =>
-  formatDate(d, `YYYY/MM/DD ${h}:00:00`)
-const getStartOfDay = (d) => formatDate(d, 'YYYY/MM/DD 00:00:00')
-const getEndOfDay = (d) => formatDate(d, 'YYYY/MM/DD 23:59:59')
-const getStartOfWeek = (d) => {
+const getStartOfHour = (d: DateInputType, h = 'HH') => formatDate(d, `YYYY/MM/DD ${h}:00:00`)
+const getStartOfDay = (d: DateInputType) => formatDate(d, 'YYYY/MM/DD 00:00:00')
+const getEndOfDay = (d: DateInputType) => formatDate(d, 'YYYY/MM/DD 23:59:59')
+const getStartOfWeek = (d: DateInputType) => {
   const date = toDate(d)
   const r = toDate(d)
   if (date.getDay() === 0) {
@@ -28,7 +29,7 @@ const getStartOfWeek = (d) => {
   }
   return getStartOfDay(r)
 }
-const getEndOfWeek = (d) => {
+const getEndOfWeek = (d: DateInputType) => {
   const date = toDate(d)
   const r = toDate(d)
   if (date.getDay() === 0) {
@@ -38,9 +39,9 @@ const getEndOfWeek = (d) => {
   }
   return getEndOfDay(r)
 }
-const getStartOfMonth = (d) => formatDate(d, 'YYYY/MM/01 00:00:00')
+const getStartOfMonth = (d: DateInputType) => formatDate(d, 'YYYY/MM/01 00:00:00')
 
-const getMaxDateOfMonth = (d) => {
+const getMaxDateOfMonth = (d: DateInputType) => {
   const date = toDate(d)
   date.setDate(1)
   date.setMonth(date.getMonth() + 1)
@@ -48,17 +49,12 @@ const getMaxDateOfMonth = (d) => {
   return date.getDate()
 }
 
-const getEndOfMonth = (d) => {
+const getEndOfMonth = (d: DateInputType) => {
   const lastDate = getMaxDateOfMonth(d)
   return formatDate(d, `YYYY/MM/${lastDate} 23:59:59`)
 }
 
-const getCloserDateTime = (
-  d,
-  interval = 15,
-  step = 0,
-  type = 'ceil'
-) => {
+const getCloserDateTime = (d: DateInputType, interval = 15, step = 0, type = 'ceil') => {
   const date = toDate(d)
   let numberInterval
   if (type === 'ceil') {
@@ -82,7 +78,7 @@ const getCloserDateTime = (
  * @param d
  * @returns {number} 返回2明天之后，返回1今天，返回0昨天之前
  */
-const getIsToday = (d) => {
+const getIsToday = (d: DateInputType) => {
   const date = toDate(d)
   const now = new Date()
   let result = 0
@@ -109,7 +105,7 @@ const getIsToday = (d) => {
   return result
 }
 
-module.exports = {
+export {
   formatDate,
   toDate,
   getStartOfHour,

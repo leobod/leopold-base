@@ -110,4 +110,4 @@ const formatObjCase = (data, type = 'Camel') => {
   }
 }
 
-module.exports = { toPascalCase, toCamelCase, toKebabCase, formatObjCase }
+export { toPascalCase, toCamelCase, toKebabCase, formatObjCase }

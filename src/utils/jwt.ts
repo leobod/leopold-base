@@ -1,9 +1,7 @@
+import jwt from "jsonwebtoken";
+const secret = '';
 
-
-const jwt = require('jsonwebtoken');
-const secret = ''
-
-const createToken = function(data={}) {
+const createToken = function (data = {}) {
   // jwt.sign({ foo: 'bar' }, 'secret_shhhhh');
   // // 方式一
   // jwt.sign({
@@ -12,14 +10,14 @@ const createToken = function(data={}) {
   // }, 'secret');
   // 方式二 推荐使用 7d表示7天过期
   return jwt.sign({}, 'secret', { expiresIn: '1h' });
-}
+};
 
-const verifyToken = function(token) {
+const verifyToken = function (token) {
   // verify a token symmetric - synchronous
   var decoded = jwt.verify(token, 'secret_shhhhh');
-  console.log(decoded) // { foo: 'bar', iat: 1644312929 }
+  console.log(decoded); // { foo: 'bar', iat: 1644312929 }
   // 如果想要把3段都输出来，即{ header, payload, signature }
-  var decoded1 = jwt.verify(token, 'secret_shhhhh', {complete: true});
+  var decoded1 = jwt.verify(token, 'secret_shhhhh', { complete: true });
   /* {
   header: { alg: 'HS256', typ: 'JWT' },
   payload: { foo: 'bar', iat: 1644312990 },
@@ -41,8 +39,6 @@ const verifyToken = function(token) {
    */
 
   // app.use(jwt({ secret: 'my-secret' }).unless({ path: [/^\/api\/login/, /^\/api\/register/]}));
-}
+};
 
-module.exports = {
-  createToken
-}
+export { createToken, verifyToken };

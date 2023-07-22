@@ -1,5 +1,5 @@
-const svgCaptcha = require('svg-captcha')
-const captchapng = require('captchapng')
+import svgCaptcha from "svg-captcha";
+import captchapng from "captchapng";
 
 const getCaptcha = function(content, type='png') {
   let result = null
@@ -42,14 +42,13 @@ const getSvgCaptcha = function() {
 }
 
 const getPngCaptcha = function(content) {
-  const p = new captchapng(80, 30, content)
-  p.color(0, 0, 0, 0)
-  p.color(80, 80, 80, 255)
-  const base64 = p.getBase64()
+  const p = new captchapng(80, 30, content);
+  p.color(0, 0, 0, 0);
+  p.color(80, 80, 80, 255);
+  const base64 = p.getBase64();
   // 'data:image/png;base64,' + base64,
-  return base64
+  return base64;
 }
 
-module.exports = {
-  getCaptcha
-}
+
+export { getCaptcha };

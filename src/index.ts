@@ -1,9 +1,6 @@
 import Koa from 'koa';
 import path from 'path';
 import { middleware } from './middleware/index';
-import { RDB } from './tools/RDB';
-import { ResultHandler } from './tools/ResultHandler';
-import http from 'http';
 
 interface ApplicationConfigType {
   root?: string;

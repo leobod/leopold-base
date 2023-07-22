@@ -2,7 +2,7 @@ import path from 'path';
 import log4js from 'koa-log4';
 import { MiddlewareItemType } from './index';
 
- const Log4j: MiddlewareItemType = {
+const Log4j: MiddlewareItemType = {
   init: function (app) {
     const log4jsConf = {
       // 日志的输出
@@ -39,7 +39,10 @@ import { MiddlewareItemType } from './index';
     const accessLogger = () => log4js.koaLogger(log4js.getLogger('access')); // 记录所有访问级别的日志
     const logger = log4js.getLogger('application');
     app.use(accessLogger());
-    app.$ow.logger = logger;
+    app.use(async (ctx, next) => {
+      ctx.logger = logger;
+      next();
+    });
   }
 };
 
