@@ -15,6 +15,7 @@ const Application = function (config = {}) {
     this.config.dynamic = config.dynamic || [];
   };
 
+  /* TODO内置处理mysql */
   this.loadMiddlewares = function () {
     for (const key in middleware) {
       this.loadMiddleware(key);
