@@ -1,21 +1,16 @@
 {
   "name": "@esidecn/leopold-base",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "",
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/lib/index.js",
-  "types": "./dist/lib/index.d.ts",
-  "scripts": {
-    "init": "tsc --init",
-    "build": "tsc --build"
-  },
+  "main": "./src/index.js",
+  "scripts": {},
   "author": "leobod (leobod@eside.cn)",
   "license": "MIT",
   "devDependencies": {
-    "prettier": "^3.0.0",
-    "typescript": "^5.1.6"
+    "prettier": "^3.0.0"
   },
   "dependencies": {
     "captchapng": "^0.0.1",
