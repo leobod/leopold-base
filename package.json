@@ -13,6 +13,7 @@
     "prettier": "^3.0.0"
   },
   "dependencies": {
+    "@esidecn/leopold-sqltool": "^0.0.4",
     "captchapng": "^0.0.1",
     "dayjs": "^1.11.9",
     "dotenv": "^16.0.3",

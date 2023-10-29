@@ -1,6 +1,6 @@
 const cors = async (ctx, next) => {
   ctx.set('Server', 'v1.0.0');
-  ctx.set('PoweredBy', 'lz');
+  ctx.set('PoweredBy', 'leopold');
   ctx.set('Access-Control-Allow-Origin', '*');
   ctx.set('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With');
   ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
@@ -12,7 +12,7 @@ const cors = async (ctx, next) => {
 };
 
 const Cors = {
-  init: function (server) {
+  init: function (server, opts = {}) {
     server.use(cors);
   }
 };
