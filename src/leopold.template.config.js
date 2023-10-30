@@ -19,9 +19,9 @@ module.exports = {
   dynamicRoutes: {
     enabled: true,
     opts: {
-      match: {
-        '/api/*': './app/api/*'
-      }
+      routes: [
+        { expr: '/api/*', mapping: './app/api/*' }
+      ]
     }
   },
   logs: {

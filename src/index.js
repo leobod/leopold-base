@@ -6,6 +6,7 @@ const { MysqlRDB } = require('@esidecn/leopold-sqltool');
 const { Result } = require('./tools/Result');
 const { Log } = require('./tools/Log');
 const { middleware } = require('./middleware');
+const { plugins } = require('./plugins');
 const { isEmpty } = require('./utils/obj');
 const templateConfig = require('./leopold.template.config');
 
@@ -31,7 +32,6 @@ const Leopold = function (config, init = true) {
     }
     this.server.use(async (ctx, next) => {
       ctx.$root = this;
-      this.server.$ctx = ctx;
       await next();
     });
     const accessLogger = () => Log.koaLogger(Log.getLogger('access'));
@@ -42,6 +42,17 @@ const Leopold = function (config, init = true) {
     for (const key in middleware) {
       if (middleware[key]) {
         middleware[key].init(this.server);
+      }
+    }
+  };
+
+  this._initPlugins = () => {
+    const pluginList = ['assets', 'dynamicRoutes'];
+    for (const key of pluginList) {
+      const pluginConfig = this.config[key];
+      if (pluginConfig && pluginConfig.enabled && plugins[key]) {
+        const { opts = {} } = pluginConfig;
+        plugins[key].init(this.server, opts);
       }
     }
   };
@@ -58,8 +69,10 @@ const Leopold = function (config, init = true) {
   const wrapper = http.createServer(server.callback()); /* koa脚手架创建的服务器 */
   this.server = server;
   this.server.$wrapper = wrapper;
+  this.server.$root = this;
   this._initTools();
   this._initMiddlewares();
+  this._initPlugins();
 };
 
 module.exports = Leopold;

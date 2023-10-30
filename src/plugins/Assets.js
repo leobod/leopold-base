@@ -2,12 +2,12 @@ const p = require('path');
 const KoaMount = require('koa-mount');
 const KoaStatic = require('koa-static');
 
-const BodyParser = {
+const Assets = {
   init: function (server, opts = {}) {
-    const { path } = opts;
+    const { path = '.' } = opts;
     server.use(
       KoaMount(
-        '/static',
+        '/assets',
         KoaStatic(p.join(process.cwd(), path), {
           index: false, // 默认为true  访问的文件为index.html  可以修改为别的文件名或者false
           hidden: false, // 是否同意传输隐藏文件
@@ -18,4 +18,4 @@ const BodyParser = {
   }
 };
 
-module.exports = { BodyParser };
+module.exports = { Assets };
