@@ -1,19 +1,24 @@
 {
   "name": "@esidecn/leopold-base",
-  "version": "1.0.3",
+  "version": "0.0.1",
   "description": "",
   "publishConfig": {
     "access": "public"
   },
-  "main": "./src/index.js",
-  "scripts": {},
+  "main": "./dist/index.js",
+  "types ": "./lib/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "author": "leobod (leobod@eside.cn)",
   "license": "MIT",
   "devDependencies": {
-    "prettier": "^3.0.0"
+    "@types/koa": "^2.13.10",
+    "dts-gen": "^0.7.2",
+    "prettier": "^3.0.0",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@esidecn/leopold-sqltool": "^0.0.4",
     "captchapng": "^0.0.1",
     "dayjs": "^1.11.9",
     "dotenv": "^16.0.3",
@@ -31,11 +36,11 @@
     "md5": "^2.3.0",
     "mime-types": "^2.1.35",
     "mysql": "^2.18.1",
-    "node-uuid": "^1.4.8",
     "nodemailer": "^6.9.3",
     "qr-image": "^3.2.0",
     "redis": "^4.3.1",
     "svg-captcha": "^1.4.0",
+    "uuid": "^9.0.1",
     "ws": "^8.9.0"
   }
 }
