@@ -14,6 +14,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/koa": "^2.13.10",
+    "@types/lodash": "^4.14.200",
     "dts-gen": "^0.7.2",
     "prettier": "^3.0.0",
     "typescript": "^5.2.2"
@@ -33,6 +34,7 @@
     "koa-router": "^12.0.0",
     "koa-static": "^5.0.0",
     "koa-view": "^2.1.4",
+    "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "mime-types": "^2.1.35",
     "mysql": "^2.18.1",

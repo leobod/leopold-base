@@ -5,6 +5,7 @@ import { MysqlRDB } from '../db/MysqlRDB';
 import { Result } from '../tools/Result';
 import { middleware } from '../middleware';
 import { isEmpty } from '../utils/obj';
+import _ from 'lodash'
 const templateConfig = require('../leopold.template.config');
 
 /**
@@ -21,7 +22,7 @@ export class Application {
    * 初始化参数
    */
   initConfig(config = { path: '' }) {
-    this.config = Object.assign({}, templateConfig, config);
+    this.config = _.merge({}, templateConfig, config);
     this.config.path = p.join(process.cwd(), config.path);
   }
   /**
