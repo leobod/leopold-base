@@ -52,7 +52,7 @@ const _parser = async (ctx, next) => {
         await next();
       }
     } else if (ext === '') {
-      const fileFullPathWithExt = lastPiece ? fileFullPath + '.js' : fileFullPath + 'Application.ts';
+      const fileFullPathWithExt = lastPiece ? fileFullPath + '.js' : fileFullPath + 'index.js';
       if (fs.existsSync(fileFullPathWithExt)) {
         const fn = require(fileFullPathWithExt);
         await fn(ctx);
