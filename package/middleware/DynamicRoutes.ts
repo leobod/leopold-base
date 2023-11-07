@@ -33,7 +33,7 @@ const _parser = async (ctx, next) => {
     const exprDir = matched.expr.replaceAll('*', '');
     const mappingDir = matched.mapping ? matched.mapping.replaceAll('*', '') : exprDir;
     const filePath = url.pathname.replace(exprDir, mappingDir);
-    const fileFullPath = path.join(config.path, filePath);
+    const fileFullPath = decodeURIComponent(path.join(config.path, filePath));
     if (['html', 'htm', 'txt', 'md'].indexOf(ext) !== -1) {
       if (fs.existsSync(fileFullPath)) {
         const content = fs.readFileSync(fileFullPath, 'utf8');
