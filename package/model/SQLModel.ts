@@ -2,17 +2,18 @@ const { SQLObject } = require('./SQLObject');
 
 export class SQLModel {
   _table: any;
+  _filter: any;
   _column: {
     [key: string]: {
       type: {
         [key: string]: any;
       };
-      allowNull: any;
-      autoIncrement: any;
-      unique: any;
-      primaryKey: any;
-      defaultExpr: any;
-      comment: any;
+      allowNull?: any;
+      autoIncrement?: any;
+      unique?: any;
+      primaryKey?: any;
+      defaultExpr?: any;
+      comment?: any;
     };
   };
   _rules: any;
@@ -27,6 +28,7 @@ export class SQLModel {
   constructor(options) {
     this._table = options.table || null;
     this._column = options.column || {};
+    this._filter = options.filter || {};
     this._rules = Object.assign({}, SQLModel.PAGE_RULES, options.rules || {});
     this._updateRules = options.updateRules || {};
     this._ref = options.ref || [];
@@ -135,6 +137,14 @@ export class SQLModel {
     for (const condkey in cond) {
       const hasWhere = this._sqlObject.where && this._sqlObject.where.length > 0;
       const condVal = cond[condkey];
+      if (condkey === 'pageNum') {
+        this.pageNum(condVal);
+        continue;
+      }
+      if (condkey === 'pageSize') {
+        this.pageSize(condVal);
+        continue;
+      }
       const ruleItem = finalRules[condkey];
       if (ruleItem) {
         if (ruleItem.isPageNum) {
