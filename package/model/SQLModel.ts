@@ -238,11 +238,11 @@ export class SQLModel {
       if (ruleItem) {
         if (ruleItem.filterNull && value) {
           this._sqlObject.fields.push(key);
-          this._sqlObject.data.push(typeof value === 'string' ? `'${value}'` : `${value}`);
+          this._sqlObject.data.push(value);
         }
       } else {
         this._sqlObject.fields.push(key);
-        this._sqlObject.data.push(typeof value === 'string' ? `'${value}'` : `${value}`);
+        this._sqlObject.data.push(value);
       }
     }
     return this;
