@@ -52,9 +52,26 @@ const _parser = async (ctx, next) => {
         await next();
       }
     } else if (ext === '') {
+      let fn: Function | null = null;
+      /* 默认路径1获取 */
+      const urlPiecesWithoutLast = [...urlPieces];
+      urlPiecesWithoutLast[urlPieces.length - 1] = '';
+      const urlWithoutLast = urlPiecesWithoutLast.join('/');
+      const defaultEntryUrl = new URL('http://0.0.0.0' + urlWithoutLast + 'index.js');
+      const defaultEntryPath = defaultEntryUrl.pathname.replace(exprDir, mappingDir);
+      const defaultEntry = decodeURIComponent(path.join(config.path, defaultEntryPath));
+      const controllerKey = lastPiece === '' || lastPiece === 'index' ? 'index' : lastPiece;
       const fileFullPathWithExt = lastPiece ? fileFullPath + '.js' : fileFullPath + 'index.js';
-      if (fs.existsSync(fileFullPathWithExt)) {
-        const fn = require(fileFullPathWithExt);
+      if (fs.existsSync(defaultEntry)) {
+        const controller = require(defaultEntry);
+        if (!(controller instanceof Function)) {
+          fn = controller[controllerKey];
+        }
+      }
+      if (!fn && fs.existsSync(fileFullPathWithExt)) {
+        fn = require(fileFullPathWithExt);
+      }
+      if (fn) {
         await fn(ctx);
         await next();
       } else {
