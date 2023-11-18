@@ -2,10 +2,11 @@ import http from 'http';
 import Koa from 'koa';
 import p from 'path';
 import { MysqlRDB } from '../db/MysqlRDB';
+import { RedisRDB } from '../db/RedisRDB';
 import { Result } from '../tools/Result';
 import { middleware } from '../middleware';
 import { isEmpty } from '../utils/obj';
-import _ from 'lodash'
+import _ from 'lodash';
 const templateConfig = require('../leopold.template.config');
 
 /**
@@ -31,6 +32,9 @@ export class Application {
   initTools() {
     if (!this.Result) {
       this.Result = Result;
+      if (this.config.STATUS_CODE && isEmpty(this.config.STATUS_CODE)) {
+        this.Result.STATUS_CODE = _.merge({}, this.Result.STATUS_CODE, this.config.STATUS_CODE);
+      }
     }
     this.server.use(async (ctx, next) => {
       ctx.$root = this;
@@ -49,6 +53,9 @@ export class Application {
         const item = this.config['DB'][key];
         if (item.type === 'MYSQL' && !isEmpty(item.config)) {
           this.DB[key] = new MysqlRDB(item.config);
+        }
+        if (item.type === 'REDIS' && !isEmpty(item.config)) {
+          this.DB[key] = new RedisRDB(item.config);
         }
       }
     }

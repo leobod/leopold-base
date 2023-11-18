@@ -12,8 +12,23 @@ module.exports = {
     //     password: '',
     //     encoding: 'utf8mb4',
     //     dateStrings: true,
-    //     connectionLimit: 50 // 最大连接数
+    //     connectionLimit: 5 // 最大连接数
     //   }
+    // },
+    // redis: {
+    //   type: 'REDIS',
+    //   config: {
+    //     host: '127.0.0.1',
+    //     port: '6379',
+    //     maxConnections: 5 // 最大连接数
+    //   }
+    // }
+  },
+  STATUS_CODE: {
+    // UNKNOWN_ERROR: {
+    //   errCode: 1,
+    //   msg: 'UNKNOWN_ERROR',
+    //   msgZh: '未知异常'
     // }
   },
   Middlewares: {

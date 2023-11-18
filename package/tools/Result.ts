@@ -5,23 +5,40 @@ export const Result = {
     data: null
   },
   STATUS_CODE: {
-    SUCCESS: 200, // 成功
-    PAGE_NOTFOUND: 404,
-    UNKNOWN_ERROR: 500, // 未知错误
-    PARAM_ERROR: 10001, // 参数错误
-    USER_ACCOUNT_ERROR: 20001, // 账号或密码错误
-    USER_LOGIN_ERROR: 30001, // 用户未登录
-    BUSINESS_ERROR: 40001, // 业务请求失败
-    AUTH_ERROR: 50001 // 认证失败或TOKEN过期
+    SUCCESS: {
+      errCode: 0,
+      msg: 'SUCCESS',
+      msgZh: '操作成功'
+    },
+    UNKNOWN_ERROR: {
+      errCode: 1,
+      msg: 'UNKNOWN_ERROR',
+      msgZh: '未知异常'
+    },
+    PARAM_ERROR: {
+      errCode: 10001,
+      msg: 'PARAM_ERROR',
+      msgZh: '参数错误'
+    },
+    ACCOUNT_PASSWD_ERROR: {
+      errCode: 10002,
+      msg: 'ACCOUNT_PASSWD_ERROR',
+      msgZh: '账号或密码错误'
+    },
+    AUTH_ERROR: {
+      errCode: 10003,
+      msg: 'AUTH_ERROR',
+      msgZh: '认证失败或TOKEN过期'
+    }
   },
-  success(data, msg = '', code = Result.STATUS_CODE.SUCCESS) {
+  success(data, msg = Result.STATUS_CODE.SUCCESS.msg, code = Result.STATUS_CODE.SUCCESS.errCode) {
     return {
       code,
       msg,
       data
     };
   },
-  fail(data, msg = '', code = Result.STATUS_CODE.UNKNOWN_ERROR) {
+  fail(data, msg = Result.STATUS_CODE.UNKNOWN_ERROR.msg, code = Result.STATUS_CODE.UNKNOWN_ERROR.errCode) {
     return {
       code,
       msg,
