@@ -9,11 +9,24 @@ import { isEmpty } from '../utils/obj';
 import _ from 'lodash';
 const templateConfig = require('../leopold.template.config');
 
+interface ApplicationDef {
+  config: any;
+  server: any;
+  Result: any;
+  DB: any;
+  initConfig: (config?: { path: '' }) => void;
+  initTools: () => void;
+  initDB: () => void;
+  initMiddlewares: () => void;
+  initPlugins: () => void;
+  start: (port?: number) => void;
+}
+
 /**
  * 应用程序
  * @type {Application}
  */
-export class Application {
+class Application implements ApplicationDef {
   config: any;
   server: any;
   Result: any;
@@ -26,6 +39,7 @@ export class Application {
     this.config = _.merge({}, templateConfig, config);
     this.config.path = p.join(process.cwd(), config.path);
   }
+
   /**
    * 加载工具
    */
@@ -120,3 +134,5 @@ export class Application {
     this.initPlugins();
   }
 }
+
+export { ApplicationDef, Application };

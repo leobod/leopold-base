@@ -1,9 +1,10 @@
-export const Result = {
-  ResponseType: {
-    code: 200,
-    msg: '',
-    data: null
-  },
+type ResponseDef = {
+  code: number;
+  msg: string;
+  data: any;
+};
+
+const Result = {
   STATUS_CODE: {
     SUCCESS: {
       errCode: 0,
@@ -31,14 +32,16 @@ export const Result = {
       msgZh: '认证失败或TOKEN过期'
     }
   },
-  success(data, msg = Result.STATUS_CODE.SUCCESS.msg, code = Result.STATUS_CODE.SUCCESS.errCode) {
+
+  success(data: any, msg: string = Result.STATUS_CODE.SUCCESS.msg, code: number = Result.STATUS_CODE.SUCCESS.errCode): ResponseDef {
     return {
       code,
       msg,
       data
     };
   },
-  fail(data, msg = Result.STATUS_CODE.UNKNOWN_ERROR.msg, code = Result.STATUS_CODE.UNKNOWN_ERROR.errCode) {
+
+  fail(data: any, msg: string = Result.STATUS_CODE.UNKNOWN_ERROR.msg, code: number = Result.STATUS_CODE.UNKNOWN_ERROR.errCode): ResponseDef {
     return {
       code,
       msg,
@@ -46,3 +49,5 @@ export const Result = {
     };
   }
 };
+
+export { Result };

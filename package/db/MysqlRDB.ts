@@ -1,6 +1,13 @@
 const mysql = require('mysql');
 
-export class MysqlRDB {
+interface MysqlRDBDef {
+  formatSql: (sql: string, params: any) => string;
+  query: (sql: string, values: any, isRelease?: boolean) => Promise<any>;
+  pureQuery: (sql: string, isRelease?: boolean) => Promise<any>;
+  trans: (tranFn: Function) => Promise<any>;
+}
+
+export class MysqlRDB implements MysqlRDBDef {
   private config: {};
   private pool: any;
 

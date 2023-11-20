@@ -1,6 +1,24 @@
 const { SQLObject } = require('./SQLObject');
 
-export class SQLModel {
+interface SQLModelDef {
+  resetSqlObject: () => void;
+  getCreateTableSql: (opt: { force: boolean; wrap: boolean }) => string;
+  getDropTableSql: (opt: { force: boolean }) => string;
+  sql: () => [string, Array<any>, string];
+  selectOne: (fields: Array<any>) => SQLModelDef;
+  select: (fields: Array<any>) => SQLModelDef;
+  addCond: (cond: Object, rules: Object, link: string) => SQLModelDef;
+  pageNum: (val: string | number) => SQLModelDef;
+  pageSize: (val: string | number) => SQLModelDef;
+  create: (obj: Object, rules: Object) => SQLModelDef;
+  update: (obj: Object, rules: Object) => SQLModelDef;
+  remove: () => SQLModelDef;
+  softRemove: (obj: Object, rules: Object) => SQLModelDef;
+  count: () => SQLModelDef;
+  valueOf: () => string;
+}
+
+class SQLModel implements SQLModelDef {
   _table: any;
   _filter: any;
   _column: {
@@ -488,3 +506,5 @@ console.log(User.getDropTableSql())
 */
 // LIMIT (pageNo - 1) * pageSize, pageSize;
 // LIMIT pageSize OFFSET (pageNo - 1) * pageSize;
+
+export { SQLModelDef, SQLModel };

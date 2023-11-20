@@ -1,6 +1,10 @@
 const { createClient } = require('redis');
 
-export class RedisRDB {
+interface RedisRDBDef {
+  execute: (command: Array<any>) => any;
+}
+
+export class RedisRDB implements RedisRDBDef {
   private config: {};
 
   constructor(config = {}) {
