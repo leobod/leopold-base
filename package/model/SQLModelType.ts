@@ -57,6 +57,20 @@ const SQLModelType = {
     };
     return new SQLType(options);
   },
+  MEDIUMTEXT: function () {
+    const options = {
+      name: 'MEDIUMTEXT',
+      cast: 'string'
+    };
+    return new SQLType(options);
+  },
+  LONGTEXT: function () {
+    const options = {
+      name: 'LONGTEXT',
+      cast: 'string'
+    };
+    return new SQLType(options);
+  },
   BOOLEAN: function (length = 1) {
     const options = {
       name: 'TINYINT',
