@@ -1,6 +1,25 @@
 const { SQLObject } = require('./SQLObject');
 
 interface SQLModelDef {
+  _table: any;
+  _filter: any;
+  _column: {
+    [key: string]: {
+      type: {
+        [key: string]: any;
+      };
+      allowNull?: any;
+      autoIncrement?: any;
+      unique?: any;
+      primaryKey?: any;
+      defaultExpr?: any;
+      comment?: any;
+    };
+  };
+  _rules: any;
+  _updateRules: any;
+  _ref: any;
+  _sqlObject: any;
   resetSqlObject: () => void;
   getCreateTableSql: (opt: { force: boolean; wrap: boolean }) => string;
   getDropTableSql: (opt: { force: boolean }) => string;
@@ -8,6 +27,7 @@ interface SQLModelDef {
   selectOne: (fields: Array<any>) => SQLModelDef;
   select: (fields: Array<any>) => SQLModelDef;
   addCond: (cond: Object, rules: Object, link: string) => SQLModelDef;
+  addJoin: (val: string) => SQLModelDef;
   pageNum: (val: string | number) => SQLModelDef;
   pageSize: (val: string | number) => SQLModelDef;
   create: (obj: Object, rules: Object) => SQLModelDef;
@@ -132,12 +152,8 @@ class SQLModel implements SQLModelDef {
       fieldList = [...columnList];
       if (this._ref && this._ref.length > 0) {
         for (const refItem of this._ref) {
-          this._sqlObject.tables.push(refItem.table);
-          if (this._sqlObject.where && this._sqlObject.where.length > 0) {
-            this._sqlObject.where.push(`AND ${refItem.where}`);
-          } else {
-            this._sqlObject.where.push(refItem.where);
-          }
+          const joinSql = `LEFT JOIN ${refItem.table} on ${refItem.where}`;
+          this.addJoin(joinSql);
           const dyColumnList = SQLObject.toColumnList(refItem.column, refItem.table);
           fieldList = [...fieldList, ...dyColumnList];
         }
@@ -182,6 +198,11 @@ class SQLModel implements SQLModelDef {
         }
       }
     }
+    return this;
+  }
+
+  addJoin(val: string) {
+    this._sqlObject.join.push(val);
     return this;
   }
 
@@ -286,19 +307,7 @@ class SQLModel implements SQLModelDef {
   }
 
   count() {
-    this.resetSqlObject();
     this._sqlObject.query = 'SELECT';
-    this._sqlObject.tables.push(this._table);
-    if (this._ref && this._ref.length > 0) {
-      for (const refItem of this._ref) {
-        this._sqlObject.tables.push(refItem.table);
-        if (this._sqlObject.where && this._sqlObject.where.length > 0) {
-          this._sqlObject.where.push(`AND ${refItem.where}`);
-        } else {
-          this._sqlObject.where.push(refItem.where);
-        }
-      }
-    }
     this._sqlObject.fields = ['COUNT(*) AS total'];
     return this;
   }

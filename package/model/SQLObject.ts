@@ -23,6 +23,7 @@ const getSqlModel = function () {
     fields: [],
     data: [],
     where: [],
+    join: [],
     append: {
       'GROUP BY': '',
       'ORDER BY': ''
@@ -48,13 +49,16 @@ const toQsv = function (model) {
   let fieldSql = '';
   let dataSql = '';
   let whereSql = '';
+  let joinSql = '';
   let sql = '';
   let value = model.data || [];
   const hasWhere = !!(model.where && model.where.length > 0);
+  const hasJoin = !!(model.join && model.join.length > 0);
   if (query === 'SELECT') {
-    tableSql = model.tables.join(', ');
+    tableSql = model.tables.map((name) => `${name} ${name}`).join(', ');
     fieldSql = model.fields.join(', ');
     whereSql = model.where.join(' ');
+    joinSql = model.join.join(' ');
     const hasPageSize = !!model.options.pageSize;
     const hasPageNum = !!model.options.pageNum;
     let pageSql = '';
@@ -67,7 +71,7 @@ const toQsv = function (model) {
         pageSql = `LIMIT ${pageSize}`;
       }
     }
-    sql = `SELECT ${fieldSql} FROM ${tableSql} ${hasWhere ? 'WHERE ' + whereSql : ''} ${pageSql ? pageSql : ''};`;
+    sql = `SELECT ${fieldSql} FROM ${tableSql} ${hasJoin ? joinSql : ''} ${hasWhere ? 'WHERE ' + whereSql : ''} ${pageSql ? pageSql : ''};`;
   } else if (query === 'UPDATE') {
     if (model.tables.length > 1) {
       throw new Error(`${query} cant have 2 more tables`);
