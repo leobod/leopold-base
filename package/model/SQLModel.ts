@@ -13,6 +13,7 @@ interface SQLModelDef {
       unique?: any;
       primaryKey?: any;
       defaultExpr?: any;
+      otherExpr?: any;
       comment?: any;
     };
   };
@@ -51,6 +52,7 @@ class SQLModel implements SQLModelDef {
       unique?: any;
       primaryKey?: any;
       defaultExpr?: any;
+      otherExpr?: any;
       comment?: any;
     };
   };
@@ -95,6 +97,9 @@ class SQLModel implements SQLModelDef {
         } else {
           columnSqlList.push(`DEFAULT ${columnItem.defaultExpr}`);
         }
+      }
+      if (columnItem.otherExpr) {
+        columnSqlList.push(columnItem.otherExpr);
       }
       if (columnItem.autoIncrement) {
         columnSqlList.push('AUTO_INCREMENT');
@@ -189,14 +194,14 @@ class SQLModel implements SQLModelDef {
           sqlStr = this._createExpr(condkey, '?', ruleItem);
           if (sqlStr) {
             this._sqlObject.where.push(`${hasWhere ? link + ' ' : ''}${sqlStr}`);
-            this._sqlObject.data.push(condVal)
+            this._sqlObject.data.push(condVal);
           }
         }
       } else {
         sqlStr = this._createExpr(condkey, '?', ruleItem);
         if (sqlStr) {
           this._sqlObject.where.push(`${hasWhere ? link + ' ' : ''}${sqlStr}`);
-          this._sqlObject.data.push(condVal)
+          this._sqlObject.data.push(condVal);
         }
       }
     }
