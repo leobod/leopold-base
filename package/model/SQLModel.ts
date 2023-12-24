@@ -23,7 +23,7 @@ interface SQLModelDef {
   resetSqlObject: () => void;
   getCreateTableSql: (opt: { force: boolean; wrap: boolean }) => string;
   getDropTableSql: (opt: { force: boolean }) => string;
-  sql: () => [string, Array<any>, string];
+  sql: () => [string, string, Array<any>, string];
   selectOne: (fields: Array<any>) => SQLModelDef;
   select: (fields: Array<any>) => SQLModelDef;
   addCond: (cond: Object, rules: Object, link: string) => SQLModelDef;
@@ -186,15 +186,17 @@ class SQLModel implements SQLModelDef {
         } else if (ruleItem.isPageSize) {
           this.pageSize(condVal);
         } else {
-          sqlStr = this._createExpr(condkey, condVal, ruleItem);
+          sqlStr = this._createExpr(condkey, '?', ruleItem);
           if (sqlStr) {
             this._sqlObject.where.push(`${hasWhere ? link + ' ' : ''}${sqlStr}`);
+            this._sqlObject.data.push(condVal)
           }
         }
       } else {
-        sqlStr = this._createExpr(condkey, condVal, ruleItem);
+        sqlStr = this._createExpr(condkey, '?', ruleItem);
         if (sqlStr) {
           this._sqlObject.where.push(`${hasWhere ? link + ' ' : ''}${sqlStr}`);
+          this._sqlObject.data.push(condVal)
         }
       }
     }
@@ -231,12 +233,7 @@ class SQLModel implements SQLModelDef {
     if (rule.fn) {
       fn = rule.fn;
     } else {
-      /* fixed string 拼接错误问题 */
-      if (typeof value === 'string') {
-        fn = (val) => `${key} ${rule.op ? rule.op : '='} '${value}'`;
-      } else {
-        fn = (val) => `${key} ${rule.op ? rule.op : '='} ${value}`;
-      }
+      fn = (val) => `${key} ${rule.op ? rule.op : '='} ${value}`;
     }
     if (rule.filterNull && !value) {
       return rule.filterNullExpr || '';

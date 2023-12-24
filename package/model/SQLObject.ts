@@ -1,3 +1,6 @@
+const mysql = require('mysql');
+// return mysql.format(sql, params);
+
 /*
 class SQLObject {
   query: string;
@@ -51,6 +54,7 @@ const toQsv = function (model) {
   let whereSql = '';
   let joinSql = '';
   let sql = '';
+  let preSql = '';
   let value = model.data || [];
   const hasWhere = !!(model.where && model.where.length > 0);
   const hasJoin = !!(model.join && model.join.length > 0);
@@ -71,7 +75,7 @@ const toQsv = function (model) {
         pageSql = `LIMIT ${pageSize}`;
       }
     }
-    sql = `SELECT ${fieldSql} FROM ${tableSql} ${hasJoin ? joinSql : ''} ${hasWhere ? 'WHERE ' + whereSql : ''} ${pageSql ? pageSql : ''};`;
+    preSql = `SELECT ${fieldSql} FROM ${tableSql} ${hasJoin ? joinSql : ''} ${hasWhere ? 'WHERE ' + whereSql : ''} ${pageSql ? pageSql : ''};`;
   } else if (query === 'UPDATE') {
     if (model.tables.length > 1) {
       throw new Error(`${query} cant have 2 more tables`);
@@ -79,24 +83,25 @@ const toQsv = function (model) {
     tableSql = model.tables.join(', ');
     fieldSql = model.fields.map((item) => `${item} = ? `).join(', ');
     whereSql = model.where.join(' ');
-    sql = `UPDATE ${tableSql} SET ${fieldSql} ${hasWhere ? 'WHERE ' + whereSql : ''};`;
+    preSql = `UPDATE ${tableSql} SET ${fieldSql} ${hasWhere ? 'WHERE ' + whereSql : ''};`;
   } else if (query === 'DELETE') {
     if (model.tables.length > 1) {
       throw new Error(`${query} cant have 2 more tables`);
     }
     tableSql = model.tables.join(', ');
     whereSql = model.where.join(' ');
-    sql = `DELETE FROM ${tableSql} ${hasWhere ? 'WHERE ' + whereSql : ''};`;
+    preSql = `DELETE FROM ${tableSql} ${hasWhere ? 'WHERE ' + whereSql : ''};`;
   } else if (query === 'INSERT') {
     if (model.tables.length > 1) {
       throw new Error(`${query} cant have 2 more tables`);
     }
     tableSql = model.tables.join(', ');
     fieldSql = model.fields.join(', ');
-    dataSql = model.data.join(', ');
-    sql = `INSERT INTO ${tableSql} (${fieldSql}) VALUES(${dataSql});`;
+    dataSql = new Array(model.fields.length).fill('?').join(', ');
+    preSql = `INSERT INTO ${tableSql} (${fieldSql}) VALUES(${dataSql});`;
   }
-  return [sql, value, query];
+  sql = mysql.format(preSql, value);
+  return [sql, preSql, value, query];
 };
 
 const toColumnList = function (column = {}, table = '') {
