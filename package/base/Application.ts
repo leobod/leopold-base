@@ -4,6 +4,7 @@ import p from 'path';
 import { MysqlRDB } from '../db/MysqlRDB';
 import { RedisRDB } from '../db/RedisRDB';
 import { Result } from '../tools/Result';
+import { Schedule } from '../tools/Schedule';
 import { middleware } from '../middleware';
 import { isEmpty } from '../utils/obj';
 import _ from 'lodash';
@@ -30,6 +31,7 @@ class Application implements ApplicationDef {
   config: any;
   server: any;
   Result: any;
+  Schedule: any;
   DB: any;
 
   /**
@@ -49,6 +51,9 @@ class Application implements ApplicationDef {
       if (this.config.STATUS_CODE && isEmpty(this.config.STATUS_CODE)) {
         this.Result.STATUS_CODE = _.merge({}, this.Result.STATUS_CODE, this.config.STATUS_CODE);
       }
+    }
+    if (!this.Schedule) {
+      this.Schedule = Schedule;
     }
     this.server.use(async (ctx, next) => {
       ctx.$root = this;
