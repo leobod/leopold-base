@@ -35,8 +35,8 @@ module.exports = {
     Assets: {
       enabled: true,
       config: {
-        path: '/assets',
-        mapping: './assets',
+        path: '/',
+        mapping: './static',
         opts: {
           index: true, // 默认为true  访问的文件为index.html  可以修改为别的文件名或者false
           hidden: false, // 是否同意传输隐藏文件
@@ -73,7 +73,7 @@ module.exports = {
     DynamicRoutes: {
       enabled: true,
       config: {
-        routes: [{ expr: '/api/*', mapping: './app/api/*' }]
+        routes: [{ expr: '/api/*', mapping: './api/*' }]
       }
     },
     ErrorHandler: {
@@ -82,7 +82,7 @@ module.exports = {
     TemplateHandler: {
       enabled: true,
       config: {
-        mapping: './web'
+        mapping: './template'
       }
     },
     Log: {

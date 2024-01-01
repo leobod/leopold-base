@@ -39,7 +39,7 @@ const _parser = async (ctx, next) => {
         const content = fs.readFileSync(fileFullPath, 'utf8');
         ctx.body = content;
       } else {
-        ctx.status = 400;
+        // ctx.status = 400;
         await next();
       }
     } else if (ext === 'js') {
@@ -48,7 +48,7 @@ const _parser = async (ctx, next) => {
         await fn(ctx);
         await next();
       } else {
-        ctx.status = 400;
+        // ctx.status = 400;
         await next();
       }
     } else if (ext === '') {
@@ -75,7 +75,7 @@ const _parser = async (ctx, next) => {
         await fn(ctx);
         await next();
       } else {
-        ctx.status = 400;
+        // ctx.status = 400;
         await next();
       }
     } else {
