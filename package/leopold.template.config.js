@@ -73,7 +73,7 @@ module.exports = {
     DynamicRoutes: {
       enabled: true,
       config: {
-        routes: [{ expr: '/api/*', mapping: './api/*' }]
+        routes: [{ dir: './api' }]
       }
     },
     ErrorHandler: {
