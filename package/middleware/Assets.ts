@@ -17,9 +17,9 @@ export const Assets = {
     enabled = true
   ) {
     if (enabled) {
-      const { path = '/assets', mapping = './assets', opts = {} } = config;
+      const { path = '/', mapping = './static', opts = {} } = config;
       const assetsOpts = Object.assign({}, opts, {
-        index: true,
+        index: 'index.html',
         hidden: false,
         defer: false
       });

@@ -7,7 +7,7 @@ interface DynamicRoutesConfigDef {
   routes: Array<{ dir: string }>;
 }
 
-const route = pathMatch()
+const route = pathMatch();
 
 const _getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = { routes: [] }) => {
   const { routes } = config;
@@ -20,13 +20,21 @@ const _getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = 
       cwd: currentDir,
       absolute: false
     });
-    const fileListPost = fileList.map((fileItem: string) => {
+    const fileListPost: Array<any> = [];
+    for (const fileItem of fileList) {
       const fileItemPath = fileItem.replace(/]/g, '').replace(/\[/g, ':').replace(/\\/g, '/').replace(/.js/g, '');
-      return {
+      if (fileItemPath.endsWith('index')) {
+        const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
+        fileListPost.push({
+          regPath: `${item.dir}/${indexFilePath}`,
+          originPath: p.join(process.cwd(), item.dir, fileItem)
+        });
+      }
+      fileListPost.push({
         regPath: `${item.dir}/${fileItemPath}`,
         originPath: p.join(process.cwd(), item.dir, fileItem)
-      };
-    });
+      });
+    }
     routeFileList = [...routeFileList, ...fileListPost];
   }
   app.routes = routeFileList.map((item) => {
@@ -36,7 +44,7 @@ const _getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = 
       originPath: item.originPath,
       fn: require(decodeURIComponent(item.originPath))
     };
-  });
+  }).reverse();
 };
 
 const _render = async (ctx, next) => {
@@ -45,10 +53,12 @@ const _render = async (ctx, next) => {
   for (const r of app.routes) {
     matched = r.match(ctx.url);
     if (matched) {
+      ctx.status = 200;
       ctx.matched = matched;
+      ctx.sta
       await r.fn(ctx);
       await next();
-      break
+      break;
     }
   }
   if (!matched) {
