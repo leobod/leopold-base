@@ -1,4 +1,4 @@
-const view = require('koa-view');
+const views = require('koa-views');
 const p = require('path');
 
 export const TemplateHandler = {
@@ -12,7 +12,7 @@ export const TemplateHandler = {
   init: function (app, server, config = { mapping: './template' }, enabled = true) {
     if (enabled) {
       const { mapping = './template' } = config;
-      server.use(view(p.join(process.cwd(), mapping)));
+      server.use(views(p.join(process.cwd(), mapping), { extension: 'ejs' }));
     }
   }
 };
