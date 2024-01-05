@@ -70,20 +70,23 @@ module.exports = {
     Cors: {
       enabled: true
     },
-    DynamicRoutes: {
-      enabled: true,
-      config: {
-        routes: [{ dir: './api' }]
-      }
-    },
-    ErrorHandler: {
-      enabled: true
-    },
     TemplateHandler: {
       enabled: true,
       config: {
         mapping: './template'
       }
+    },
+    DynamicRoutes: {
+      enabled: true,
+      config: {
+        routes: [
+          { dir: '/server', mapping: '/api' },
+          { dir: '/views', mapping: '/' }
+        ]
+      }
+    },
+    ErrorHandler: {
+      enabled: true
     },
     Log: {
       enabled: true,

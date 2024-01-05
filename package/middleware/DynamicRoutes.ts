@@ -4,12 +4,12 @@ const pathMatch = require('path-match');
 const { globSync } = require('glob');
 
 interface DynamicRoutesConfigDef {
-  routes: Array<{ dir: string }>;
+  routes: Array<{ dir: string, mapping: string }>;
 }
 
 const route = pathMatch();
 
-const _getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = { routes: [] }) => {
+const getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = { routes: [] }) => {
   const { routes } = config;
   const routeList = routes ? routes : [];
   let routeFileList: Array<any> = [];
@@ -26,12 +26,12 @@ const _getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = 
       if (fileItemPath.endsWith('index')) {
         const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
         fileListPost.push({
-          regPath: `${item.dir}/${indexFilePath}`,
+          regPath: `${item.mapping === '/' ? '' : item.mapping}/${indexFilePath}`,
           originPath: p.join(process.cwd(), item.dir, fileItem)
         });
       }
       fileListPost.push({
-        regPath: `${item.dir}/${fileItemPath}`,
+        regPath: `${item.mapping === '/' ? '' : item.mapping}/${fileItemPath}`,
         originPath: p.join(process.cwd(), item.dir, fileItem)
       });
     }
@@ -47,7 +47,7 @@ const _getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = 
   }).reverse();
 };
 
-const _render = async (ctx, next) => {
+const renderMatch = async (ctx, next) => {
   const app = ctx.$root;
   let matched = null;
   for (const r of app.routes) {
@@ -55,7 +55,6 @@ const _render = async (ctx, next) => {
     if (matched) {
       ctx.status = 200;
       ctx.matched = matched;
-      ctx.sta
       await r.fn(ctx);
       await next();
       break;
@@ -76,8 +75,8 @@ export const DynamicRoutes = {
    */
   init: function (app, server, config = { routes: [] }, enabled = true) {
     if (enabled) {
-      _getRenderFilePath(app, server, config);
-      server.use(_render);
+      getRenderFilePath(app, server, config);
+      server.use(renderMatch);
     }
   }
 };
