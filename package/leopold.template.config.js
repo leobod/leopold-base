@@ -32,6 +32,9 @@ module.exports = {
     // }
   },
   Middlewares: {
+    Cors: {
+      enabled: true
+    },
     Assets: {
       enabled: true,
       config: {
@@ -42,6 +45,12 @@ module.exports = {
           hidden: false, // 是否同意传输隐藏文件
           defer: false // 如果为true，则在返回next()之后进行服务，从而允许后续中间件先进行响应
         }
+      }
+    },
+    Log: {
+      enabled: true,
+      config: {
+        mapping: './logs'
       }
     },
     BodyParser: {
@@ -67,9 +76,6 @@ module.exports = {
         }
       }
     },
-    Cors: {
-      enabled: true
-    },
     TemplateHandler: {
       enabled: true,
       config: {
@@ -87,12 +93,6 @@ module.exports = {
     },
     ErrorHandler: {
       enabled: true
-    },
-    Log: {
-      enabled: true,
-      config: {
-        mapping: './logs'
-      }
     }
   },
   Plugins: {}
