@@ -51,7 +51,8 @@ const renderMatch = async (ctx, next) => {
   const app = ctx.$root;
   let matched = null;
   for (const r of app.routes) {
-    matched = r.match(ctx.url);
+    const url = new URL('http://localhost' + ctx.url)
+    matched = r.match(url.pathname);
     if (matched) {
       ctx.status = 200;
       ctx.matched = matched;
