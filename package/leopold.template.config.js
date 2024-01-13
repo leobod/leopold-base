@@ -90,9 +90,6 @@ module.exports = {
           { dir: '/views', mapping: '/' }
         ]
       }
-    },
-    ErrorHandler: {
-      enabled: true
     }
   },
   Plugins: {}
