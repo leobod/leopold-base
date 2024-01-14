@@ -680,3 +680,8 @@ const UserModel = new SQLModel({
 
 module.exports = UserModel;
 ```
+
+## fix记录
++ 0.0.2
+  + fix: 移除ErrorHandler
+  + 2024/01/14 fix: data数据多余的‘’拼接问题
