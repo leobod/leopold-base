@@ -31,6 +31,8 @@ interface SQLModelDef {
   addJoin: (val: string) => SQLModelDef;
   pageNum: (val: string | number) => SQLModelDef;
   pageSize: (val: string | number) => SQLModelDef;
+  orderBy: (val: string) => SQLModelDef;
+  groupBy: (val: string) => SQLModelDef;
   create: (obj: Object, rules: Object) => SQLModelDef;
   update: (obj: Object, rules: Object) => SQLModelDef;
   remove: () => SQLModelDef;
@@ -231,6 +233,16 @@ class SQLModel implements SQLModelDef {
       this._sqlObject.options.pageSize = null;
     }
     return this;
+  }
+
+  orderBy(val) {
+    this._sqlObject.append['ORDER BY'] = val || ''
+    return this
+  }
+
+  groupBy(val) {
+    this._sqlObject.append['GROUP BY'] = val || ''
+    return this
   }
 
   _createExpr(key, value, rule: { fn?: Function; op?: any; filterNull?: any; filterNullExpr?: any } = {}) {

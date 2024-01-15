@@ -683,5 +683,6 @@ module.exports = UserModel;
 
 ## fix记录
 + 0.0.2
-  + fix: 移除ErrorHandler
-  + 2024/01/14 fix: data数据多余的‘’拼接问题
+  + 移除ErrorHandler
+  + 2024/01/14 data数据多余的‘’拼接问题
+  + 2021/01/15 补充OrderBy与GroupBy初步支持

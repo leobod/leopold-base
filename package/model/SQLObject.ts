@@ -65,6 +65,8 @@ const toQsv = function (model) {
     joinSql = model.join.join(' ');
     const hasPageSize = !!model.options.pageSize;
     const hasPageNum = !!model.options.pageNum;
+    const hasOrderBy = !!model.append['ORDER BY']
+    const hasGroupBy = !!model.append['GROUP BY']
     let pageSql = '';
     if (hasPageSize) {
       const { pageNum, pageSize } = model.options;
@@ -75,7 +77,10 @@ const toQsv = function (model) {
         pageSql = `LIMIT ${pageSize}`;
       }
     }
-    preSql = `SELECT ${fieldSql} FROM ${tableSql} ${hasJoin ? joinSql : ''} ${hasWhere ? 'WHERE ' + whereSql : ''} ${pageSql ? pageSql : ''};`;
+    const orderBySql = hasOrderBy ? `ORDER BY ${model.append['ORDER BY']}` : '';
+    const groupBySql = hasGroupBy ? `GROUP BY ${model.append['GROUP BY']}` : '';
+
+    preSql = `SELECT ${fieldSql} FROM ${tableSql} ${hasJoin ? joinSql : ''} ${hasWhere ? 'WHERE ' + whereSql : ''} ${pageSql ? pageSql : ''} ${orderBySql} ${groupBySql};`;
   } else if (query === 'UPDATE') {
     if (model.tables.length > 1) {
       throw new Error(`${query} cant have 2 more tables`);
