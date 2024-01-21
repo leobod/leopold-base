@@ -5,6 +5,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist/",
+    "lib/",
+    "package/"
+  ],
   "main": "./dist/index.js",
   "types ": "./lib/index.d.ts",
   "scripts": {
