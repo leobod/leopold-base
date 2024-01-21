@@ -727,7 +727,7 @@ module.exports = async (ctx) => {
 ```
 
 ## fix记录
-+ 0.0.2
++ 0.0.3
   + 移除ErrorHandler
   + 2024/01/14 data数据多余的‘’拼接问题
   + 2024/01/15 补充OrderBy与GroupBy初步支持
