@@ -7,11 +7,11 @@ const { Log } = require('./Log');
 const { TemplateHandler } = require('./TemplateHandler');
 
 export const middleware = {
-  Assets: Assets,
+  Log: Log,
+  Cors: Cors,
   BodyParser: BodyParser,
   Compress: Compress,
-  Cors: Cors,
+  Assets: Assets,
+  TemplateHandler: TemplateHandler,
   DynamicRoutes: DynamicRoutes,
-  Log: Log,
-  TemplateHandler: TemplateHandler
 };

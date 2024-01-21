@@ -1,3 +1,5 @@
+const p = require('path');
+
 module.exports = {
   path: '.',
   port: 8360,
@@ -32,25 +34,51 @@ module.exports = {
     // }
   },
   Middlewares: {
-    Cors: {
-      enabled: true
-    },
-    Assets: {
-      enabled: true,
-      config: {
-        path: '/',
-        mapping: './static',
-        opts: {
-          index: true, // 默认为true  访问的文件为index.html  可以修改为别的文件名或者false
-          hidden: false, // 是否同意传输隐藏文件
-          defer: false // 如果为true，则在返回next()之后进行服务，从而允许后续中间件先进行响应
-        }
-      }
-    },
     Log: {
       enabled: true,
       config: {
-        mapping: './logs'
+        mapping: './logs',
+        opts: {
+          // 日志的输出
+          appenders: {
+            access: {
+              type: 'dateFile',
+              pattern: '-yyyy-MM-dd.log', //生成文件的规则
+              alwaysIncludePattern: true, // 文件名始终以日期区分
+              encoding: 'utf-8',
+              filename: p.join(process.cwd(), './logs/access'), //生成文件名
+              maxLogSize: 5 * 1000 * 1000, // 超过多少(byte)就切割
+              keepFileExt: true // 切割的日志保留文件扩展名，false(默认):生成类似default.log.1文件;true:生成类似default.1.log
+            },
+            application: {
+              type: 'dateFile',
+              pattern: '-yyyy-MM-dd.log',
+              alwaysIncludePattern: true,
+              encoding: 'utf-8',
+              filename: p.join(process.cwd(), './logs/application'),
+              maxLogSize: 5 * 1000 * 1000,
+              keepFileExt: true
+            },
+            out: {
+              type: 'console'
+            }
+          },
+          categories: {
+            default: { appenders: ['out'], level: 'info' },
+            access: { appenders: ['access'], level: 'info' },
+            application: { appenders: ['application'], level: 'all' }
+          }
+        }
+      }
+    },
+    Cors: {
+      enabled: true,
+      config: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Expose-Headers': '*',
+        'Access-Control-Max-Age': 60,
+        'Access-Control-Allow-Methods': 'PUT, POST, GET, DELETE, OPTIONS'
       }
     },
     BodyParser: {
@@ -73,6 +101,18 @@ module.exports = {
             return /text/i.test(content_type);
           },
           threshold: 2048
+        }
+      }
+    },
+    Assets: {
+      enabled: true,
+      config: {
+        path: '/',
+        mapping: './static',
+        opts: {
+          index: 'index.html', // 默认为true  访问的文件为index.html  可以修改为别的文件名
+          hidden: false, // 是否同意传输隐藏文件
+          defer: false // 如果为true，则在返回next()之后进行服务，从而允许后续中间件先进行响应
         }
       }
     },

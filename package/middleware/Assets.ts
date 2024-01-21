@@ -18,11 +18,15 @@ export const Assets = {
   ) {
     if (enabled) {
       const { path = '/', mapping = './static', opts = {} } = config;
-      const assetsOpts = Object.assign({}, opts, {
-        index: 'index.html',
-        hidden: false,
-        defer: false
-      });
+      const assetsOpts = Object.assign(
+        {},
+        {
+          index: 'index.html',
+          hidden: false,
+          defer: false
+        },
+        opts
+      );
       server.use(KoaMount(path, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
     }
   }

@@ -12,27 +12,26 @@ const Result = {
       msgZh: '操作成功'
     },
     UNKNOWN_ERROR: {
-      errCode: 1,
+      errCode: 101,
       msg: 'UNKNOWN_ERROR',
       msgZh: '未知异常'
     },
     PARAM_ERROR: {
-      errCode: 10001,
+      errCode: 102,
       msg: 'PARAM_ERROR',
       msgZh: '参数错误'
     },
     ACCOUNT_PASSWD_ERROR: {
-      errCode: 10002,
+      errCode: 103,
       msg: 'ACCOUNT_PASSWD_ERROR',
       msgZh: '账号或密码错误'
     },
     AUTH_ERROR: {
-      errCode: 10003,
+      errCode: 104,
       msg: 'AUTH_ERROR',
       msgZh: '认证失败或TOKEN过期'
     }
   },
-
   success(data: any, msg: string = Result.STATUS_CODE.SUCCESS.msg, code: number = Result.STATUS_CODE.SUCCESS.errCode): ResponseDef {
     return {
       code,
