@@ -64,44 +64,44 @@ module.exports = {
     //   msgZh: '未知异常'
     // }
   },
-  Middlewares: {
-    Log: {
-      enabled: true,
-      config: {
-        mapping: './logs',
-        opts: {
-          // 日志的输出
-          appenders: {
-            access: {
-              type: 'dateFile',
-              pattern: '-yyyy-MM-dd.log', //生成文件的规则
-              alwaysIncludePattern: true, // 文件名始终以日期区分
-              encoding: 'utf-8',
-              filename: p.join(process.cwd(), './logs/access'), //生成文件名
-              maxLogSize: 5 * 1000 * 1000, // 超过多少(byte)就切割
-              keepFileExt: true // 切割的日志保留文件扩展名，false(默认):生成类似default.log.1文件;true:生成类似default.1.log
-            },
-            application: {
-              type: 'dateFile',
-              pattern: '-yyyy-MM-dd.log',
-              alwaysIncludePattern: true,
-              encoding: 'utf-8',
-              filename: p.join(process.cwd(), './logs/application'),
-              maxLogSize: 5 * 1000 * 1000,
-              keepFileExt: true
-            },
-            out: {
-              type: 'console'
-            }
+  Log: {
+    enabled: true,
+    config: {
+      mapping: './logs',
+      opts: {
+        // 日志的输出
+        appenders: {
+          access: {
+            type: 'dateFile',
+            pattern: '-yyyy-MM-dd.log', //生成文件的规则
+            alwaysIncludePattern: true, // 文件名始终以日期区分
+            encoding: 'utf-8',
+            filename: p.join(process.cwd(), './logs/access'), //生成文件名
+            maxLogSize: 5 * 1000 * 1000, // 超过多少(byte)就切割
+            keepFileExt: true // 切割的日志保留文件扩展名，false(默认):生成类似default.log.1文件;true:生成类似default.1.log
           },
-          categories: {
-            default: { appenders: ['out'], level: 'info' },
-            access: { appenders: ['access'], level: 'info' },
-            application: { appenders: ['application'], level: 'all' }
+          application: {
+            type: 'dateFile',
+            pattern: '-yyyy-MM-dd.log',
+            alwaysIncludePattern: true,
+            encoding: 'utf-8',
+            filename: p.join(process.cwd(), './logs/application'),
+            maxLogSize: 5 * 1000 * 1000,
+            keepFileExt: true
+          },
+          out: {
+            type: 'console'
           }
+        },
+        categories: {
+          default: { appenders: ['out'], level: 'info' },
+          access: { appenders: ['access'], level: 'info' },
+          application: { appenders: ['application'], level: 'all' }
         }
       }
-    },
+    }
+  },
+  Middlewares: {
     Cors: {
       enabled: true,
       config: {
@@ -732,3 +732,6 @@ module.exports = async (ctx) => {
   + 2024/01/14 data数据多余的‘’拼接问题
   + 2024/01/15 补充OrderBy与GroupBy初步支持
   + 2024/01/21 全部参数化,可以按需使用配置文件覆盖原始的部分配置
++ 0.0.5
+  + 2023/04/04 Log配置提升
+  + 2023/04/04 常用工具，直接挂载到ctx

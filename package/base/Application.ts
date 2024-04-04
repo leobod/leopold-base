@@ -59,7 +59,7 @@ class Application implements ApplicationDef {
       this.Schedule = Schedule;
     }
     if (!this.Log) {
-      const { mapping = './logs', opts = {} } = this.config.Log;
+      const { mapping = './logs', opts = {} } = this.config.Log.config;
       this.Log = initLog(mapping, opts);
     }
     this.server.use(async (ctx, next) => {
