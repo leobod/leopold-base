@@ -5,9 +5,11 @@ import { MysqlRDB } from '../db/MysqlRDB';
 import { RedisRDB } from '../db/RedisRDB';
 import { Result } from '../tools/Result';
 import { Schedule } from '../tools/Schedule';
+import { initLog } from '../tools/Log';
 import { middleware } from '../middleware';
 import { isEmpty } from '../utils/obj';
 import _ from 'lodash';
+import log4js from 'koa-log4';
 const templateConfig = require('../leopold.template.config');
 
 interface ApplicationDef {
@@ -33,6 +35,7 @@ class Application implements ApplicationDef {
   Result: any;
   Schedule: any;
   DB: any;
+  Log: any;
 
   /**
    * 初始化参数
@@ -55,10 +58,20 @@ class Application implements ApplicationDef {
     if (!this.Schedule) {
       this.Schedule = Schedule;
     }
+    if (!this.Log) {
+      const { mapping = './logs', opts = {} } = this.config.Log;
+      this.Log = initLog(mapping, opts);
+    }
     this.server.use(async (ctx, next) => {
       ctx.$root = this;
+      ctx.$db = this.DB;
+      ctx.$schedule = this.Schedule;
+      ctx.$result = this.Result;
+      ctx.$log = this.Log;
       await next();
     });
+    const accessLogger = () => log4js.koaLogger(log4js.getLogger('access'));
+    this.server.use(accessLogger());
   }
 
   /**
@@ -133,8 +146,8 @@ class Application implements ApplicationDef {
     this.server = server;
     this.server.$wrapper = wrapper;
     this.server.$root = this;
-    this.initTools();
     this.initDB();
+    this.initTools();
     this.initMiddlewares();
     this.initPlugins();
   }
