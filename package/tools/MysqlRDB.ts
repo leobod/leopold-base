@@ -1,13 +1,6 @@
-const mysql = require('mysql');
+import mysql from 'mysql';
 
-interface MysqlRDBDef {
-  formatSql: (sql: string, params: any) => string;
-  query: (sql: string, values: any, isRelease?: boolean) => Promise<any>;
-  pureQuery: (sql: string, isRelease?: boolean) => Promise<any>;
-  trans: (tranFn: Function) => Promise<any>;
-}
-
-export class MysqlRDB implements MysqlRDBDef {
+class MysqlRDB {
   private config: {};
   private pool: any;
 
@@ -20,7 +13,7 @@ export class MysqlRDB implements MysqlRDBDef {
       password: '',
       encoding: 'utf8mb4',
       dateStrings: true,
-      connectionLimit: 50, // 最大连接数
+      connectionLimit: 5, // 最大连接数
       prefix: ''
     };
     this.config = Object.assign({}, configTemplate, config);
@@ -39,42 +32,18 @@ export class MysqlRDB implements MysqlRDBDef {
 
   /**
    * 模板替换SQL执行
-   * @param sql
+   * @param command
    * @param values
    * @param isRelease
    * @returns {Promise<unknown>}
    */
-  query(sql, values, isRelease = true) {
+  query(command, values = [], isRelease = true) {
     return new Promise((resolve, reject) => {
       this.pool.getConnection((err, connection) => {
         if (err) {
           reject(err);
         } else {
-          connection.query(sql, values, (err, result) => {
-            if (err) reject(err);
-            else resolve(result);
-            if (isRelease) {
-              connection.release();
-            }
-          });
-        }
-      });
-    });
-  }
-
-  /**
-   * 存粹SQL执行
-   * @param sql
-   * @param isRelease
-   * @returns {Promise<unknown>}
-   */
-  pureQuery(sql, isRelease = true) {
-    return new Promise((resolve, reject) => {
-      this.pool.getConnection((err, connection) => {
-        if (err) {
-          reject(err);
-        } else {
-          connection.query(sql, (err, result) => {
+          connection.query(command, values, (err, result) => {
             if (err) reject(err);
             else resolve(result);
             if (isRelease) {
@@ -132,3 +101,5 @@ export class MysqlRDB implements MysqlRDBDef {
     });
   }
 }
+
+export { MysqlRDB };

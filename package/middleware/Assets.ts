@@ -1,6 +1,6 @@
-const p = require('path');
-const KoaMount = require('koa-mount');
-const KoaStatic = require('koa-static');
+import p from 'path';
+import KoaMount from 'koa-mount';
+import KoaStatic from 'koa-static';
 
 export const Assets = {
   /**

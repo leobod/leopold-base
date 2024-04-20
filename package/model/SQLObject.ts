@@ -65,8 +65,8 @@ const toQsv = function (model) {
     joinSql = model.join.join(' ');
     const hasPageSize = !!model.options.pageSize;
     const hasPageNum = !!model.options.pageNum;
-    const hasOrderBy = !!model.append['ORDER BY']
-    const hasGroupBy = !!model.append['GROUP BY']
+    const hasOrderBy = !!model.append['ORDER BY'];
+    const hasGroupBy = !!model.append['GROUP BY'];
     let pageSql = '';
     if (hasPageSize) {
       const { pageNum, pageSize } = model.options;

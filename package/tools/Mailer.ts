@@ -1,20 +1,21 @@
-const nodemailer = require('nodemailer');
-const emailConfig = {
-  host: '',
-  port: '',
-  auth: {
-    user: '', //这个表示的发送方的邮箱
-    pass: '' //表示授权码.授权码获取方式在后面
-  },
-  secure: false
-};
+import nodemailer from 'nodemailer';
+import _ from 'lodash';
 
-export class Mailer {
+class Mailer {
   private config: any;
   private mailer: any;
 
-  constructor(cofig) {
-    this.config = cofig;
+  constructor(config = {}) {
+    const emailConfigTemplate = {
+      host: '',
+      port: '',
+      auth: {
+        user: '', //这个表示的发送方的邮箱
+        pass: '' //表示授权码.授权码获取方式在后面
+      },
+      secure: false
+    };
+    this.config = _.merge({}, emailConfigTemplate, config);
     this.config.secure = Number(this.config.port) === 465;
     this.mailer = nodemailer.createTransport(this.config);
   }
@@ -59,3 +60,5 @@ export class Mailer {
     }
   }
 }
+
+export { Mailer };

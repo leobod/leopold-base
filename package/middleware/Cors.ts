@@ -1,6 +1,4 @@
-import {isEmpty} from "../utils/obj";
-
-const pkg = require("../../package.json")
+import { isEmpty } from '../utils/obj';
 
 export const Cors = {
   /**
@@ -13,12 +11,12 @@ export const Cors = {
   init: function (app, server, config = {}, enabled = true) {
     if (enabled) {
       server.use(async (ctx, next) => {
-        ctx.set('Lz-Version', pkg.version);
-        ctx.set('PoweredBy', 'lz');
+        ctx.set('leopold', 'v0.0.6');
+        ctx.set('PoweredBy', 'leopold');
         if (!isEmpty(config)) {
           for (const key in config) {
-            const val = config[key]
-            ctx.set(key, val)
+            const val = config[key];
+            ctx.set(key, val);
           }
         }
         if (ctx.method == 'OPTIONS') {

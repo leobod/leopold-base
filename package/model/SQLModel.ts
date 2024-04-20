@@ -236,13 +236,13 @@ class SQLModel implements SQLModelDef {
   }
 
   orderBy(val) {
-    this._sqlObject.append['ORDER BY'] = val || ''
-    return this
+    this._sqlObject.append['ORDER BY'] = val || '';
+    return this;
   }
 
   groupBy(val) {
-    this._sqlObject.append['GROUP BY'] = val || ''
-    return this
+    this._sqlObject.append['GROUP BY'] = val || '';
+    return this;
   }
 
   _createExpr(key, value, rule: { fn?: Function; op?: any; filterNull?: any; filterNullExpr?: any } = {}) {

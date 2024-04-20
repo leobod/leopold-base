@@ -1,10 +1,10 @@
-const p = require('path');
-const fs = require('fs');
-const pathMatch = require('path-match');
-const { globSync } = require('glob');
+import p from 'path';
+import fs from 'fs';
+import pathMatch from 'path-match';
+import { globSync } from 'glob';
 
 interface DynamicRoutesConfigDef {
-  routes: Array<{ dir: string, mapping: string }>;
+  routes: Array<{ dir: string; mapping: string }>;
 }
 
 const route = pathMatch();
@@ -37,21 +37,23 @@ const getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = {
     }
     routeFileList = [...routeFileList, ...fileListPost];
   }
-  app.routes = routeFileList.map((item) => {
-    return {
-      match: route(item.regPath),
-      regPath: item.regPath,
-      originPath: item.originPath,
-      fn: require(decodeURIComponent(item.originPath))
-    };
-  }).reverse();
+  app.routes = routeFileList
+    .map((item) => {
+      return {
+        match: route(item.regPath),
+        regPath: item.regPath,
+        originPath: item.originPath,
+        fn: require(decodeURIComponent(item.originPath))
+      };
+    })
+    .reverse();
 };
 
 const renderMatch = async (ctx, next) => {
-  const app = ctx.$root;
+  const leopold = ctx.leopold;
   let matched = null;
-  for (const r of app.routes) {
-    const url = new URL('http://localhost' + ctx.url)
+  for (const r of leopold.routes) {
+    const url = new URL('http://localhost' + ctx.url);
     matched = r.match(url.pathname);
     if (matched) {
       ctx.status = 200;
@@ -69,15 +71,15 @@ const renderMatch = async (ctx, next) => {
 export const DynamicRoutes = {
   /**
    * 加载动态路由
+   * @param leopold
    * @param app
-   * @param server
    * @param config
    * @param enabled
    */
-  init: function (app, server, config = { routes: [] }, enabled = true) {
+  init: function (leopold, app, config = { routes: [] }, enabled = true) {
     if (enabled) {
-      getRenderFilePath(app, server, config);
-      server.use(renderMatch);
+      getRenderFilePath(leopold, app, config);
+      app.use(renderMatch);
     }
   }
 };

@@ -1,6 +1,5 @@
-import {Job} from "node-schedule";
-
-const schedule = require('node-schedule');
+import schedule from 'node-schedule';
+import { Server } from 'http';
 
 /*
 *    *    *    *    *    *
@@ -52,38 +51,48 @@ for (let i in schedule.scheduledJobs) {
 schedule.gracefulShutdown();
  */
 
-interface ScheduleDef {
-  list: Object,
-  createJob: (name: string, rule:any, method: Function) => any,
-  stopJob: (name: string) => boolean
-}
+class ScheduleManager {
+  public list: any = {};
 
-const Schedule = {
-  list: {},
+  constructor() {}
+
   /**
    * 创建job
    * @param name
    * @param rule
    * @param method
    */
-  createJob: function (name, rule, method) {
+  createJob(name, rule, method) {
     if (this.list[name]) {
       this.list[name].cancel();
     }
     this.list[name] = schedule.scheduleJob(name, rule, method);
-    return this.list[name]
-  },
+    return this.list[name];
+  }
   /**
    * 停止指定Job
    * @param name
    */
-  stopJob: function (name) {
+  stopJob(name) {
     if (this.list[name]) {
       this.list[name].cancel();
-      return true
+      return true;
     }
-    return false
+    return false;
   }
+}
+
+class Schedule {
+  public static instance: ScheduleManager | null = null;
+
+  public static onCreate = function (config = {}) {
+    const instance: ScheduleManager = new ScheduleManager();
+    Schedule.instance = instance;
+    return instance;
+  };
+}
+const useSchedule = function () {
+  return Schedule.instance;
 };
 
-export { Schedule };
+export { Schedule, useSchedule };

@@ -1,27 +1,24 @@
-const { createClient } = require('redis');
+import { createClient } from 'redis';
 
-interface RedisRDBDef {
-  execute: (command: Array<any>) => any;
-}
-
-export class RedisRDB implements RedisRDBDef {
+class RedisRDB {
   private config: {};
 
   constructor(config = {}) {
     const configTemplate = {
       host: '',
-      port: '6379',
-      maxConnections: 5
+      port: '6379'
     };
     this.config = Object.assign({}, configTemplate, config);
   }
 
-  async execute(command) {
+  async query(command, values = [], isRelease = true) {
     let result = null;
     let client: any = null;
     try {
       client = await createClient(this.config)
-        .on('error', (err) => console.log('Redis Client Error', err))
+        .on('error', (err) => {
+          throw err;
+        })
         .connect();
       if (typeof command === 'string') {
         const commandList = command.split(' ');
@@ -31,10 +28,13 @@ export class RedisRDB implements RedisRDBDef {
         result = await client.sendCommand(command);
       }
     } catch (e) {
-      console.log(e);
-    } finally {
-      if (client) await client.quit();
+      throw e;
+    }
+    if (isRelease && client) {
+      client.quit();
     }
     return result;
   }
 }
+
+export { RedisRDB };
