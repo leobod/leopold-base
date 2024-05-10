@@ -7,12 +7,9 @@ export const TemplateHandler = {
    * @param app
    * @param server
    * @param config
-   * @param enabled
    */
-  init: function (app, server, config = { mapping: './template' }, enabled = true) {
-    if (enabled) {
-      const { mapping = './template' } = config;
-      server.use(views(p.join(process.cwd(), mapping), { extension: 'ejs' }));
-    }
+  onLoad: function (app, server, config = { mapping: './template' }) {
+    const { mapping = './template' } = config;
+    server.use(views(p.join(process.cwd(), mapping), { extension: 'ejs' }));
   }
 };

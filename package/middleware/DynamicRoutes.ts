@@ -59,7 +59,7 @@ const renderMatch = async (ctx, next) => {
       ctx.status = 200;
       ctx.matched = matched;
       await r.fn(ctx);
-      await next();
+      // await next();
       break;
     }
   }
@@ -76,7 +76,7 @@ export const DynamicRoutes = {
    * @param config
    * @param enabled
    */
-  init: function (leopold, app, config = { routes: [] }, enabled = true) {
+  onLoad: function (leopold, app, config = { routes: [] }, enabled = true) {
     if (enabled) {
       getRenderFilePath(leopold, app, config);
       app.use(renderMatch);

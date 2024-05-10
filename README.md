@@ -86,41 +86,20 @@ module.exports = {
           maxLogSize: 5 * 1000 * 1000,
           keepFileExt: true
         },
-        debug: {
-          type: 'dateFile',
-          pattern: '-yyyy-MM-dd.log',
-          alwaysIncludePattern: true,
-          encoding: 'utf-8',
-          filename: p.join(process.cwd(), './logs/debug'),
-          maxLogSize: 5 * 1000 * 1000,
-          keepFileExt: true
-        },
-        error: {
-          type: 'dateFile',
-          pattern: '-yyyy-MM-dd.log',
-          alwaysIncludePattern: true,
-          encoding: 'utf-8',
-          filename: p.join(process.cwd(), './logs/error'),
-          maxLogSize: 5 * 1000 * 1000,
-          keepFileExt: true
-        },
         out: {
           type: 'console'
         }
       },
       categories: {
-        default: { appenders: ['debug'], level: 'all' },
         access: { appenders: ['access'], level: 'info' },
-        debug: { appenders: ['debug'], level: 'all' },
-        error: { appenders: ['error'], level: 'all' },
-        application: { appenders: ['application'], level: 'all' }
+        application: { appenders: ['application'], level: 'all' },
+        default: { appenders: ['application'], level: 'all' }
       }
     }
   },
   middlewares: {
     Cors: {
-      enabled: true,
-      config: {
+      opts: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*',
         'Access-Control-Expose-Headers': '*',
@@ -129,54 +108,39 @@ module.exports = {
       }
     },
     BodyParser: {
-      enabled: true,
-      config: {
-        opts: {
-          multipart: true,
-          formidable: {
-            maxFileSize: 200 * 1024 * 1024, // 设置上传文件大小最大限制，默认2M
-            keepExtensions: true // 保持后缀名
-          }
+      opts: {
+        multipart: true,
+        formidable: {
+          maxFileSize: 200 * 1024 * 1024, // 设置上传文件大小最大限制，默认2M
+          keepExtensions: true // 保持后缀名
         }
       }
     },
     Compress: {
-      enabled: true,
-      config: {
-        opts: {
-          filter: function (content_type) {
-            return /text/i.test(content_type);
-          },
-          threshold: 2048
-        }
+      opts: {
+        filter: function (content_type) {
+          return /text/i.test(content_type);
+        },
+        threshold: 2048
       }
     },
     Assets: {
-      enabled: true,
-      config: {
-        path: '/',
-        mapping: './static',
-        opts: {
-          index: 'index.html', // 默认为true  访问的文件为index.html  可以修改为别的文件名
-          hidden: false, // 是否同意传输隐藏文件
-          defer: false // 如果为true，则在返回next()之后进行服务，从而允许后续中间件先进行响应
-        }
+      path: '/',
+      mapping: './static',
+      opts: {
+        index: 'index.html', // 默认为true  访问的文件为index.html  可以修改为别的文件名
+        hidden: false, // 是否同意传输隐藏文件
+        defer: false // 如果为true，则在返回next()之后进行服务，从而允许后续中间件先进行响应
       }
     },
     TemplateHandler: {
-      enabled: true,
-      config: {
-        mapping: './template'
-      }
+      mapping: './template'
     },
     DynamicRoutes: {
-      enabled: true,
-      config: {
-        routes: [
-          { dir: '/server', mapping: '/api' },
-          { dir: '/views', mapping: '/' }
-        ]
-      }
+      routes: [
+        { dir: '/server', mapping: '/api' },
+        { dir: '/views', mapping: '/' }
+      ]
     }
   }
 };
@@ -748,5 +712,11 @@ module.exports = async (ctx) => {
   + 2024/01/15 补充OrderBy与GroupBy初步支持
   + 2024/01/21 全部参数化,可以按需使用配置文件覆盖原始的部分配置
 + 0.0.5
-  + 2023/04/04 Log配置提升
-  + 2023/04/04 常用工具，直接挂载到ctx
+  + 2024/04/04 Log配置提升
+  + 2024/04/04 常用工具，直接挂载到ctx
++ 0.0.6
+  + 2024/04/21 修改入口与插件使用方式
++ 0.0.7
+  + 2024/05/11 动态路由无next,默认作为终结点，进一步简化配置使用
+  + 2024/05/11 开发load来提供更灵活的顺序加载方式，开放use提供自定义插件加载入口
+  + 2024/05/11 优化库的输出文件及其目录文件结构，提供更好的类型提示支持

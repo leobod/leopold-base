@@ -1,17 +1,15 @@
 {
   "name": "@eside/leopold",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "publishConfig": {
     "access": "public"
   },
   "files": [
-    "dist/",
-    "lib/",
-    "package/"
+    "dist/"
   ],
   "main": "./dist/index.js",
-  "types ": "./lib/index.d.ts",
+  "types ": "./dist",
   "scripts": {
     "build": "tsc"
   },

@@ -8,26 +8,26 @@ export const Assets = {
    * @param app
    * @param server
    * @param config  { path, mapping, opts }
-   * @param enabled
    */
-  init: function (
+  onLoad: function (
     app,
     server,
-    config: { path: string; mapping: string; opts: {} } = { path: '/assets', mapping: './assets', opts: {} },
-    enabled = true
-  ) {
-    if (enabled) {
-      const { path = '/', mapping = './static', opts = {} } = config;
-      const assetsOpts = Object.assign(
-        {},
-        {
-          index: 'index.html',
-          hidden: false,
-          defer: false
-        },
-        opts
-      );
-      server.use(KoaMount(path, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
+    config: { path: string; mapping: string; opts: {} } = {
+      path: '/',
+      mapping: './static',
+      opts: {}
     }
+  ) {
+    const { path = '/', mapping = './static', opts = {} } = config;
+    const assetsOpts = Object.assign(
+      {},
+      // {
+      //   index: 'index.html',
+      //   hidden: false,
+      //   defer: false
+      // },
+      opts
+    );
+    server.use(KoaMount(path, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
   }
 };

@@ -49,20 +49,43 @@ class Leopold {
       ctx.result = this.result;
       ctx.schedule = this.schedule;
       ctx.db = this.db;
+      ctx.getItem = (field) => {
+        if (this[field]) return this[field];
+        return null;
+      };
       await next();
     });
     const accessLogger = () => log4js.koaLogger(log4js.getLogger('access'));
     this.app.use(accessLogger());
     // 加载中间件
-    const middlewaresOpts = this.config.middlewares || {};
-    if (!isEmpty(middlewaresOpts)) {
-      for (const key in middlewaresOpts) {
-        if (middleware[key] && middlewaresOpts[key].enabled) {
-          middleware[key].init(this, this.app, middlewaresOpts[key].config, middlewaresOpts[key].enabled);
+    Leopold.instance = this;
+  }
+
+  load(arrs: Array<string> | null) {
+    const middlewareConfig = this.config.middlewares || {};
+    let willLoadedKeys: Array<string> = [];
+    if (!isEmpty(middlewareConfig)) {
+      const middlewareKeys = Object.keys(middlewareConfig);
+      if (!arrs) {
+        willLoadedKeys = [...middlewareKeys];
+      }
+      if (arrs instanceof Array) {
+        for (const key of arrs) {
+          if (middlewareKeys.indexOf(key) !== -1) {
+            willLoadedKeys.push(key);
+          }
         }
       }
+      for (const key of willLoadedKeys) {
+        middleware[key].onLoad(this, this.app, middlewareConfig[key]);
+      }
     }
-    Leopold.instance = this;
+  }
+
+  use(fn) {
+    if (fn instanceof Function) {
+      fn(this, this.app);
+    }
   }
 
   /**
