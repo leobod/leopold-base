@@ -1,25 +1,20 @@
 import p from 'path';
-import fs from 'fs';
-import pathMatch from 'path-match';
 import { globSync } from 'glob';
+import { routePrefixMather } from '../utils/routeMatch';
 
 interface DynamicRoutesConfig {
-  routes: Array<{ match: string; dir: string }>;
+  opts: Array<{ match: string; dir: string }>;
 }
-
-const matcher = pathMatch();
 
 const getRenderFilePath = async (
   app,
   server,
-  config: DynamicRoutesConfig = { routes: [] }
+  config: DynamicRoutesConfig = { opts: [] }
 ) => {
-  const { routes } = config;
-  const matcherList: Array<any> = [];
-  const routeList = routes ? routes : [];
+  const { opts } = config;
+  const routeList = opts ? opts : [];
   let routeFileList: Array<any> = [];
   for (const item of routeList) {
-    matcherList.push(matcher(item.match));
     const currentDir = p.join(process.cwd(), item.dir);
     const fileList = globSync(['**/*.js'], {
       ignore: 'node_modules/**',
@@ -37,22 +32,23 @@ const getRenderFilePath = async (
         const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
         fileListPost.push({
           isLeaf: true,
-          regPath: `${item.match === '/' ? '' : item.match}/${indexFilePath}`,
+          regPath: `${item.match === '/' ? '' : item.match}${indexFilePath}`,
           originPath: p.join(process.cwd(), item.dir, fileItem)
         });
       }
       fileListPost.push({
         isLeaf: true,
-        regPath: `${item.match === '/' ? '' : item.match}/${fileItemPath}`,
+        regPath: `${item.match === '/' ? '' : item.match}${fileItemPath}`,
         originPath: p.join(process.cwd(), item.dir, fileItem)
       });
     }
     routeFileList.push({
-      match: matcher(item.match),
+      match: routePrefixMather(item.match),
+      regPath: item.match,
       isLeaf: false,
       children: fileListPost
         .map((item) => {
-          item.match = matcher(item.regPath);
+          item.match = routePrefixMather(item.regPath);
           item.fn = require(decodeURIComponent(item.originPath));
           return item;
         })
@@ -67,7 +63,7 @@ const renderMatch = async (ctx, next) => {
   let matched = null;
   for (const group of leopold.routes) {
     if (group.match(ctx.url)) {
-      for (const item of leopold.children) {
+      for (const item of group.children) {
         matched = item.match(ctx.url);
         if (matched) {
           ctx.status = 200;
@@ -91,7 +87,7 @@ export const DynamicRoutes = {
    * @param app
    * @param config
    */
-  onLoad: function (leopold, app, config: DynamicRoutesConfig = { routes: [] }) {
+  onLoad: function (leopold, app, config: DynamicRoutesConfig = { opts: [] }) {
     getRenderFilePath(leopold, app, config);
     app.use(renderMatch);
   }

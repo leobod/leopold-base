@@ -81,7 +81,7 @@ class Leopold {
       }
       for (const key of willLoadedKeys) {
         const finalConfig = _.merge({}, middlewareConfig[key], config);
-        Middleware[key].onLoad(this, this.app, middlewareConfig[key]);
+        Middleware[key].onLoad(this, this.app, finalConfig);
       }
     }
   }

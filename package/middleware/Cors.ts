@@ -20,7 +20,7 @@ export const Cors = {
       if (matcher(ctx.url)) {
         if (!isEmpty(opts)) {
           for (const key in opts) {
-            const val = config[key];
+            const val = opts[key];
             ctx.set(key, val);
           }
         }

@@ -111,7 +111,7 @@ module.exports = {
       opts: { extension: 'ejs' }
     },
     DynamicRoutes: {
-      opts: [{ match: '/api', dir: '/api' }]
+      opts: [{ match: '/api/', dir: '/api' }]
     }
   }
 };

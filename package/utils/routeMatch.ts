@@ -15,7 +15,12 @@ const routePrefixToRegex = function (prefix) {
 };
 
 const routePrefixMather = function (match) {
-  const matcher = pathMatch(match);
+  const matcher = pathMatch({
+    // path-to-regexp options
+    sensitive: false,
+    strict: false,
+    end: false
+  })(match);
   return matcher;
 };
 
