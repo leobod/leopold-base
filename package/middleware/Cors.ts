@@ -17,7 +17,7 @@ export const Cors = {
     const { match = '/', opts = {} } = config;
     const matcher = routePrefixMather(match);
     server.use(async (ctx, next) => {
-      if (matcher.match(ctx.url)) {
+      if (matcher(ctx.url)) {
         if (!isEmpty(opts)) {
           for (const key in opts) {
             const val = config[key];
