@@ -99,6 +99,7 @@ module.exports = {
   },
   middlewares: {
     Cors: {
+      match: '/',
       opts: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*',
@@ -108,6 +109,7 @@ module.exports = {
       }
     },
     BodyParser: {
+      match: '/',
       opts: {
         multipart: true,
         formidable: {
@@ -117,15 +119,17 @@ module.exports = {
       }
     },
     Compress: {
+      match: '/',
       opts: {
         filter: function (content_type) {
           return /text/i.test(content_type);
         },
-        threshold: 2048
+        threshold: 2048,
+        flush: require('zlib').Z_SYNC_FLUSH
       }
     },
     Assets: {
-      path: '/',
+      match: '/',
       mapping: './static',
       opts: {
         index: 'index.html', // 默认为true  访问的文件为index.html  可以修改为别的文件名
@@ -134,13 +138,11 @@ module.exports = {
       }
     },
     TemplateHandler: {
-      mapping: './template'
+      mapping: './template',
+      opts: { extension: 'ejs' }
     },
     DynamicRoutes: {
-      routes: [
-        { dir: '/server', mapping: '/api' },
-        { dir: '/views', mapping: '/' }
-      ]
+      opts: [{ match: '/api', dir: '/api' }]
     }
   }
 };
@@ -720,3 +722,4 @@ module.exports = async (ctx) => {
   + 2024/05/11 动态路由无next,默认作为终结点，进一步简化配置使用
   + 2024/05/11 开发load来提供更灵活的顺序加载方式，开放use提供自定义插件加载入口
   + 2024/05/11 优化库的输出文件及其目录文件结构，提供更好的类型提示支持
+  + 2024/05/13 针对性的路由插件处理,提供默认加载的插件方式，和后期开放性的内置可选插件加载方式

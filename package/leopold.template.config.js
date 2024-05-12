@@ -68,6 +68,7 @@ module.exports = {
   },
   middlewares: {
     Cors: {
+      match: '/',
       opts: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*',
@@ -77,6 +78,7 @@ module.exports = {
       }
     },
     BodyParser: {
+      match: '/',
       opts: {
         multipart: true,
         formidable: {
@@ -86,6 +88,7 @@ module.exports = {
       }
     },
     Compress: {
+      match: '/',
       opts: {
         filter: function (content_type) {
           return /text/i.test(content_type);
@@ -95,7 +98,7 @@ module.exports = {
       }
     },
     Assets: {
-      path: '/',
+      match: '/',
       mapping: './static',
       opts: {
         index: 'index.html', // 默认为true  访问的文件为index.html  可以修改为别的文件名
@@ -104,13 +107,11 @@ module.exports = {
       }
     },
     TemplateHandler: {
-      mapping: './template'
+      mapping: './template',
+      opts: { extension: 'ejs' }
     },
     DynamicRoutes: {
-      routes: [
-        { dir: '/server', mapping: '/api' },
-        { dir: '/views', mapping: '/' }
-      ]
+      opts: [{ match: '/api', dir: '/api' }]
     }
   }
 };

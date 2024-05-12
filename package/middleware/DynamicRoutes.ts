@@ -3,17 +3,23 @@ import fs from 'fs';
 import pathMatch from 'path-match';
 import { globSync } from 'glob';
 
-interface DynamicRoutesConfigDef {
-  routes: Array<{ dir: string; mapping: string }>;
+interface DynamicRoutesConfig {
+  routes: Array<{ match: string; dir: string }>;
 }
 
-const route = pathMatch();
+const matcher = pathMatch();
 
-const getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = { routes: [] }) => {
+const getRenderFilePath = async (
+  app,
+  server,
+  config: DynamicRoutesConfig = { routes: [] }
+) => {
   const { routes } = config;
+  const matcherList: Array<any> = [];
   const routeList = routes ? routes : [];
   let routeFileList: Array<any> = [];
   for (const item of routeList) {
+    matcherList.push(matcher(item.match));
     const currentDir = p.join(process.cwd(), item.dir);
     const fileList = globSync(['**/*.js'], {
       ignore: 'node_modules/**',
@@ -22,45 +28,55 @@ const getRenderFilePath = async (app, server, config: DynamicRoutesConfigDef = {
     });
     const fileListPost: Array<any> = [];
     for (const fileItem of fileList) {
-      const fileItemPath = fileItem.replace(/]/g, '').replace(/\[/g, ':').replace(/\\/g, '/').replace(/.js/g, '');
+      const fileItemPath = fileItem
+        .replace(/]/g, '')
+        .replace(/\[/g, ':')
+        .replace(/\\/g, '/')
+        .replace(/.js/g, '');
       if (fileItemPath.endsWith('index')) {
         const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
         fileListPost.push({
-          regPath: `${item.mapping === '/' ? '' : item.mapping}/${indexFilePath}`,
+          isLeaf: true,
+          regPath: `${item.match === '/' ? '' : item.match}/${indexFilePath}`,
           originPath: p.join(process.cwd(), item.dir, fileItem)
         });
       }
       fileListPost.push({
-        regPath: `${item.mapping === '/' ? '' : item.mapping}/${fileItemPath}`,
+        isLeaf: true,
+        regPath: `${item.match === '/' ? '' : item.match}/${fileItemPath}`,
         originPath: p.join(process.cwd(), item.dir, fileItem)
       });
     }
-    routeFileList = [...routeFileList, ...fileListPost];
+    routeFileList.push({
+      match: matcher(item.match),
+      isLeaf: false,
+      children: fileListPost
+        .map((item) => {
+          item.match = matcher(item.regPath);
+          item.fn = require(decodeURIComponent(item.originPath));
+          return item;
+        })
+        .reverse()
+    });
   }
-  app.routes = routeFileList
-    .map((item) => {
-      return {
-        match: route(item.regPath),
-        regPath: item.regPath,
-        originPath: item.originPath,
-        fn: require(decodeURIComponent(item.originPath))
-      };
-    })
-    .reverse();
+  app.routes = routeFileList;
 };
 
 const renderMatch = async (ctx, next) => {
   const leopold = ctx.leopold;
   let matched = null;
-  for (const r of leopold.routes) {
-    const url = new URL('http://localhost' + ctx.url);
-    matched = r.match(url.pathname);
-    if (matched) {
-      ctx.status = 200;
-      ctx.matched = matched;
-      await r.fn(ctx);
-      // await next();
-      break;
+  for (const group of leopold.routes) {
+    if (group.match(ctx.url)) {
+      for (const item of leopold.children) {
+        matched = item.match(ctx.url);
+        if (matched) {
+          ctx.status = 200;
+          ctx.matched = matched;
+          await item.fn(ctx);
+          // await next();
+          break;
+        }
+      }
     }
   }
   if (!matched) {
@@ -74,12 +90,9 @@ export const DynamicRoutes = {
    * @param leopold
    * @param app
    * @param config
-   * @param enabled
    */
-  onLoad: function (leopold, app, config = { routes: [] }, enabled = true) {
-    if (enabled) {
-      getRenderFilePath(leopold, app, config);
-      app.use(renderMatch);
-    }
+  onLoad: function (leopold, app, config: DynamicRoutesConfig = { routes: [] }) {
+    getRenderFilePath(leopold, app, config);
+    app.use(renderMatch);
   }
 };

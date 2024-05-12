@@ -6,7 +6,7 @@ import { Result } from '../plugins/Result';
 import { Schedule } from '../plugins/Schedule';
 import { Db } from '../plugins/Db';
 import p from 'path';
-import { middleware } from '../middleware';
+import { defaultMiddlewares, Middleware } from '../middleware';
 import { isEmpty } from '../utils/obj';
 import _ from 'lodash';
 import log4js from 'koa-log4';
@@ -44,6 +44,8 @@ class Leopold {
     this.db = Db.onCreate(pluginsOpts.Db);
     // 加载日志
     this.app.use(async (ctx, next) => {
+      ctx.set('leopold', 'v0.0.7');
+      ctx.set('PoweredBy', 'leopold');
       ctx.leopold = this;
       ctx.log = this.log;
       ctx.result = this.result;
@@ -61,13 +63,14 @@ class Leopold {
     Leopold.instance = this;
   }
 
-  load(arrs: Array<string> | null) {
+  load(arrs: Array<string> | string = 'default', config = {}) {
     const middlewareConfig = this.config.middlewares || {};
     let willLoadedKeys: Array<string> = [];
     if (!isEmpty(middlewareConfig)) {
       const middlewareKeys = Object.keys(middlewareConfig);
-      if (!arrs) {
-        willLoadedKeys = [...middlewareKeys];
+      if (typeof arrs === 'string') {
+        if (arrs === 'default') willLoadedKeys = [...defaultMiddlewares];
+        else willLoadedKeys = [arrs];
       }
       if (arrs instanceof Array) {
         for (const key of arrs) {
@@ -77,7 +80,8 @@ class Leopold {
         }
       }
       for (const key of willLoadedKeys) {
-        middleware[key].onLoad(this, this.app, middlewareConfig[key]);
+        const finalConfig = _.merge({}, middlewareConfig[key], config);
+        Middleware[key].onLoad(this, this.app, middlewareConfig[key]);
       }
     }
   }

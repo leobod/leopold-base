@@ -1,4 +1,12 @@
 export { Leopold, useLeopold } from './base/Leopold';
+
+export { Assets } from './middleware/Assets';
+export { BodyParser } from './middleware/BodyParser';
+export { Compress } from './middleware/Compress';
+export { Cors } from './middleware/Cors';
+export { DynamicRoutes } from './middleware/DynamicRoutes';
+export { TemplateHandler } from './middleware/TemplateHandler';
+
 export { useDb } from './plugins/Db';
 export { useLogger } from './plugins/Logger';
 export { useResult } from './plugins/Result';

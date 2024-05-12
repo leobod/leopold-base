@@ -2,6 +2,12 @@ import p from 'path';
 import KoaMount from 'koa-mount';
 import KoaStatic from 'koa-static';
 
+interface AssetsConfig {
+  match?: string;
+  mapping?: string;
+  opts?: Object;
+}
+
 export const Assets = {
   /**
    * 加载Assets
@@ -9,16 +15,8 @@ export const Assets = {
    * @param server
    * @param config  { path, mapping, opts }
    */
-  onLoad: function (
-    app,
-    server,
-    config: { path: string; mapping: string; opts: {} } = {
-      path: '/',
-      mapping: './static',
-      opts: {}
-    }
-  ) {
-    const { path = '/', mapping = './static', opts = {} } = config;
+  onLoad: function (app, server, config: AssetsConfig = {}) {
+    const { match = '/', mapping = './static', opts = {} } = config;
     const assetsOpts = Object.assign(
       {},
       // {
@@ -28,6 +26,6 @@ export const Assets = {
       // },
       opts
     );
-    server.use(KoaMount(path, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
+    server.use(KoaMount(match, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
   }
 };

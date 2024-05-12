@@ -1,4 +1,10 @@
 import { isEmpty } from '../utils/obj';
+import { routePrefixMather } from '../utils/routeMatch';
+
+interface CorsConfig {
+  match?: string;
+  opts?: Object;
+}
 
 export const Cors = {
   /**
@@ -7,20 +13,22 @@ export const Cors = {
    * @param server
    * @param config
    */
-  onLoad: function (app, server, config = {}) {
+  onLoad: function (app, server, config: CorsConfig = {}) {
+    const { match = '/', opts = {} } = config;
+    const matcher = routePrefixMather(match);
     server.use(async (ctx, next) => {
-      ctx.set('leopold', 'v0.0.6');
-      ctx.set('PoweredBy', 'leopold');
-      if (!isEmpty(config)) {
-        for (const key in config) {
-          const val = config[key];
-          ctx.set(key, val);
+      if (matcher.match(ctx.url)) {
+        if (!isEmpty(opts)) {
+          for (const key in opts) {
+            const val = config[key];
+            ctx.set(key, val);
+          }
         }
-      }
-      if (ctx.method == 'OPTIONS') {
-        ctx.body = 200;
-      } else {
-        await next();
+        if (ctx.method == 'OPTIONS') {
+          ctx.body = 200;
+        } else {
+          await next();
+        }
       }
     });
   }

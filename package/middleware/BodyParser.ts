@@ -1,4 +1,11 @@
+import { routePrefixMather } from '../utils/routeMatch';
+
 const KoaBody = require('koa-body');
+
+interface BodyParserConfig {
+  match?: string;
+  opts?: Object;
+}
 
 export const BodyParser = {
   /**
@@ -7,8 +14,9 @@ export const BodyParser = {
    * @param server
    * @param config
    */
-  onLoad: function (app, server, config = { opts: {} }) {
-    const { opts = {} } = config;
+  onLoad: function (app, server, config: BodyParserConfig = {}) {
+    const { match = '/', opts = {} } = config;
+    const matcher = routePrefixMather(match);
     const finalOpts = Object.assign(
       {},
       // {
@@ -20,6 +28,12 @@ export const BodyParser = {
       // },
       opts
     );
-    server.use(KoaBody(finalOpts));
+    server.use(async (ctx, next) => {
+      if (matcher(ctx.url)) {
+        await KoaBody(finalOpts)(ctx, next);
+      } else {
+        await next();
+      }
+    });
   }
 };
