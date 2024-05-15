@@ -18,7 +18,7 @@ const routePrefixMather = function (match) {
   const matcher = pathMatch({
     // path-to-regexp options
     sensitive: false,
-    strict: false,
+    strict: true,
     end: false
   })(match);
   return matcher;
