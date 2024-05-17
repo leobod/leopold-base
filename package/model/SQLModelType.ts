@@ -20,17 +20,7 @@ class SQLType {
     this._options = options;
   }
 
-  toCast(val) {
-    return val;
-  }
-  toString() {
-    return this._cast ? this._cast : '';
-  }
-  /**
-   * ''+dataType === ''+dataType.valueOf()
-   * @returns {*|null}
-   */
-  valueOf() {
+  toDialect() {
     if (this._decimals) {
       return `${this._name}(${this._length},${this._decimals})`;
     } else if (this._length) {

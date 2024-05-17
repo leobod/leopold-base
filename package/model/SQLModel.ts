@@ -1,8 +1,7 @@
 const { SQLObject } = require('./SQLObject');
 
-interface SQLModelDef {
+class SQLModel {
   _table: any;
-  _filter: any;
   _column: {
     [key: string]: {
       type: {
@@ -13,521 +12,344 @@ interface SQLModelDef {
       unique?: any;
       primaryKey?: any;
       defaultExpr?: any;
-      otherExpr?: any;
       comment?: any;
+      rawExpr?: any;
+      ref?: any;
+      origin?: any;
+      operate: any;
     };
   };
-  _rules: any;
-  _updateRules: any;
   _ref: any;
-  _sqlObject: any;
-  resetSqlObject: () => void;
-  getCreateTableSql: (opt: { force: boolean; wrap: boolean }) => string;
-  getDropTableSql: (opt: { force: boolean }) => string;
-  sql: () => [string, string, Array<any>, string];
-  selectOne: (fields: Array<any>) => SQLModelDef;
-  select: (fields: Array<any>) => SQLModelDef;
-  addCond: (cond: Object, rules: Object, link: string) => SQLModelDef;
-  addJoin: (val: string) => SQLModelDef;
-  pageNum: (val: string | number) => SQLModelDef;
-  pageSize: (val: string | number) => SQLModelDef;
-  orderBy: (val: string) => SQLModelDef;
-  groupBy: (val: string) => SQLModelDef;
-  create: (obj: Object, rules: Object) => SQLModelDef;
-  update: (obj: Object, rules: Object) => SQLModelDef;
-  remove: () => SQLModelDef;
-  softRemove: (obj: Object, rules: Object) => SQLModelDef;
-  count: () => SQLModelDef;
-  valueOf: () => string;
-}
-
-class SQLModel implements SQLModelDef {
-  _table: any;
   _filter: any;
-  _column: {
-    [key: string]: {
-      type: {
-        [key: string]: any;
-      };
-      allowNull?: any;
-      autoIncrement?: any;
-      unique?: any;
-      primaryKey?: any;
-      defaultExpr?: any;
-      otherExpr?: any;
-      comment?: any;
-    };
-  };
-  _rules: any;
-  _updateRules: any;
-  _ref: any;
   _sqlObject: any;
-  static PAGE_RULES: {
-    page: { isPageNum: true };
-    size: { isPageSize: true };
-  };
 
   constructor(options) {
+    if (!options.table) throw new Error('table required');
     this._table = options.table || null;
     this._column = options.column || {};
+    this._ref = options.ref || {};
     this._filter = options.filter || {};
-    this._rules = Object.assign({}, SQLModel.PAGE_RULES, options.rules || {});
-    this._updateRules = options.updateRules || {};
-    this._ref = options.ref || [];
     this._sqlObject = SQLObject.getSqlModel();
   }
-
+  /**
+   * 重置SqlObject
+   */
   resetSqlObject() {
     this._sqlObject = SQLObject.getSqlModel();
   }
-
-  getCreateTableSql(opt = { force: false, wrap: false }) {
-    const { force, wrap } = opt;
-    const contentList: Array<any> = [];
+  /**
+   * 建表
+   * @param force
+   */
+  create(force = false) {
+    this.resetSqlObject();
+    // 记录类型
+    this._sqlObject.type = 'CREATE';
+    // 定义query
+    this._sqlObject.query.push('CREATE');
+    this._sqlObject.query.push('TABLE');
+    if (!force) {
+      this._sqlObject.query.push('IF NOT EXISTS');
+    }
+    this._sqlObject.query.push(this._table);
+    this._sqlObject.end = `;`;
+    // 定义columns
     const pkList: Array<any> = [];
     for (const key in this._column) {
       const columnSqlList: Array<any> = [];
-      const columnItem = this._column[key];
-      columnSqlList.push(key);
-      columnSqlList.push('' + columnItem.type);
-      if (columnItem.allowNull !== undefined && !columnItem.allowNull) {
-        columnSqlList.push('NOT NULL');
-      }
-      if (columnItem.defaultExpr) {
-        if (columnItem.type._name === 'VARCHAR') {
-          columnSqlList.push(`DEFAULT '${columnItem.defaultExpr}'`);
-        } else {
-          columnSqlList.push(`DEFAULT ${columnItem.defaultExpr}`);
+      const item = this._column[key];
+      if (!item.ref) {
+        columnSqlList.push(key);
+        columnSqlList.push(item.type.toDialect());
+        if (item.allowNull !== undefined && !item.allowNull) {
+          columnSqlList.push('NOT NULL');
         }
-      }
-      if (columnItem.otherExpr) {
-        columnSqlList.push(columnItem.otherExpr);
-      }
-      if (columnItem.autoIncrement) {
-        columnSqlList.push('AUTO_INCREMENT');
-      }
-      if (columnItem.unique) {
-        columnSqlList.push('UNIQUE');
-      }
-      if (columnItem.comment) {
-        columnSqlList.push(`COMMENT '${columnItem.comment}'`);
-      }
-      /* 定义主体 */
-      contentList.push(columnSqlList.join(' '));
-      if (columnItem.primaryKey) {
-        pkList.push(key);
+        if (item.defaultExpr) {
+          if (item.type._name === 'VARCHAR') {
+            columnSqlList.push(`DEFAULT '${item.defaultExpr}'`);
+          } else {
+            columnSqlList.push(`DEFAULT ${item.defaultExpr}`);
+          }
+        }
+        if (item.rawExpr) {
+          columnSqlList.push(item.rawExpr);
+        }
+        if (item.autoIncrement) {
+          columnSqlList.push('AUTO_INCREMENT');
+        }
+        if (item.unique) {
+          columnSqlList.push('UNIQUE');
+        }
+        if (item.comment) {
+          columnSqlList.push(`COMMENT '${item.comment}'`);
+        }
+        this._sqlObject.columns.push(columnSqlList.join(' '));
+        if (item.primaryKey) {
+          pkList.push(key);
+        }
       }
     }
     if (pkList.length > 0) {
-      contentList.push(`PRIMARY KEY (${pkList.join(',')})`);
+      this._sqlObject.columns.push(`PRIMARY KEY (${pkList.join(',')})`);
     }
-    const headerSql = `CREATE TABLE ${force ? '' : 'IF NOT EXISTS'} ${this._table} (`;
-    const contentSql = wrap ? contentList.join(',\n') : contentList.join(',');
-    const footerSql = `);`;
-    const sqlList: Array<any> = [];
-    sqlList.push(headerSql);
-    sqlList.push(contentSql);
-    sqlList.push(footerSql);
-    return wrap ? sqlList.join('\n') : sqlList.join('');
-  }
-
-  getDropTableSql(opt = { force: false }) {
-    const { force } = opt;
-    const contentSql = `DROP TABLE ${force ? '' : 'IF EXISTS'} ${this._table};`;
-    const sqlList: Array<any> = [];
-    sqlList.push(contentSql);
-    return sqlList.join('');
-  }
-
-  sql() {
-    return SQLObject.toQsv(this._sqlObject);
-  }
-
-  selectOne(fields = ['*']) {
-    this.select(fields).pageNum(1).pageSize(1);
     return this;
   }
 
-  select(fields = ['*']) {
+  drop(force = false) {
     this.resetSqlObject();
-    this._sqlObject.query = 'SELECT';
-    this._sqlObject.tables.push(this._table);
-    const isAll = fields.indexOf('*') !== -1;
-    let fieldList: Array<any> = [];
-    if (isAll) {
-      const columnList = SQLObject.toColumnList(this._column, this._table);
-      fieldList = [...columnList];
-      if (this._ref && this._ref.length > 0) {
-        for (const refItem of this._ref) {
-          const joinSql = `LEFT JOIN ${refItem.table} on ${refItem.where}`;
-          this.addJoin(joinSql);
-          const dyColumnList = SQLObject.toColumnList(refItem.column, refItem.table);
-          fieldList = [...fieldList, ...dyColumnList];
-        }
-      }
-    } else {
-      fieldList = fields;
+    this._sqlObject.type = 'DROP';
+    this._sqlObject.query.push('DROP');
+    this._sqlObject.query.push('TABLE');
+    if (!force) {
+      this._sqlObject.query.push('IF EXISTS');
     }
-    this._sqlObject.fields = fieldList;
+    this._sqlObject.query.push(this._table);
+    this._sqlObject.end = ';';
     return this;
   }
 
-  addCond(cond = {}, rules = {}, link = 'AND') {
-    let sqlStr = '';
-    const finalRules = Object.assign({}, this._rules, rules);
-    for (const condkey in cond) {
-      const hasWhere = this._sqlObject.where && this._sqlObject.where.length > 0;
-      const condVal = cond[condkey];
-      if (condkey === 'pageNum') {
-        this.pageNum(condVal);
-        continue;
-      }
-      if (condkey === 'pageSize') {
-        this.pageSize(condVal);
-        continue;
-      }
-      const ruleItem = finalRules[condkey];
-      if (ruleItem) {
-        if (ruleItem.isPageNum) {
-          this.pageNum(condVal);
-        } else if (ruleItem.isPageSize) {
-          this.pageSize(condVal);
-        } else {
-          sqlStr = this._createExpr(condkey, '?', ruleItem);
-          if (sqlStr) {
-            this._sqlObject.where.push(`${hasWhere ? link + ' ' : ''}${sqlStr}`);
-            this._sqlObject.data.push(condVal);
+  select(fields: Array<string> | string = '*') {
+    if (!fields) throw new Error('fields required');
+    this.resetSqlObject();
+    this._sqlObject.type = 'SELECT';
+    this._sqlObject.query.push('SELECT');
+    this._sqlObject.end = ';';
+    let fieldKeyList: Array<string> = [];
+    if (fields instanceof Array) {
+      if (fields.indexOf('*') !== -1) fieldKeyList = Object.keys(this._column);
+      else fieldKeyList = [...fields];
+    } else {
+      if (fields === '*') fieldKeyList = Object.keys(this._column);
+      else fieldKeyList = [fields];
+    }
+    const tableKeyList: Array<string> = [];
+    for (const key of fieldKeyList) {
+      const columnItem = this._column[key];
+      if (columnItem) {
+        const columnItemSql: Array<string> = [];
+        if (columnItem.ref && columnItem.origin) {
+          if (tableKeyList.indexOf(columnItem.ref) === -1) {
+            tableKeyList.push(columnItem.ref);
           }
+          columnItemSql.push(`${columnItem.ref}.${columnItem.origin}`);
+        } else if (columnItem.origin) {
+          columnItemSql.push(`${this._table}.${columnItem.origin}`);
+        } else {
+          columnItemSql.push(`${this._table}.${key}`);
         }
-      } else {
-        sqlStr = this._createExpr(condkey, '?', ruleItem);
-        if (sqlStr) {
-          this._sqlObject.where.push(`${hasWhere ? link + ' ' : ''}${sqlStr}`);
-          this._sqlObject.data.push(condVal);
-        }
+        columnItemSql.push(`AS`);
+        columnItemSql.push(`${key}`);
+        this._sqlObject.columns.push(columnItemSql.join(' '));
       }
     }
-    return this;
-  }
-
-  addJoin(val: string) {
-    this._sqlObject.join.push(val);
-    return this;
-  }
-
-  pageNum(val) {
-    const pageNum = Number(val);
-    if (!isNaN(pageNum)) {
-      this._sqlObject.options.pageNum = pageNum;
-    } else {
-      this._sqlObject.options.pageNum = null;
+    for (const tableKey of tableKeyList) {
+      const tableRefWhere = this._ref[tableKey];
+      if (tableRefWhere) {
+        this._sqlObject.wheres.push({
+          type: 'AND',
+          value: tableRefWhere
+        });
+      }
     }
+    this._sqlObject.table = [this._table, ...tableKeyList];
     return this;
   }
 
-  pageSize(val) {
-    const pageSize = Number(val);
-    if (!isNaN(pageSize)) {
-      this._sqlObject.options.pageSize = pageSize;
+  selectOne(fields: Array<string> | string = '*') {
+    this.select(fields).page(1, 1);
+    return this;
+  }
+
+  getColumnInfo(key) {
+    let columnKey = key;
+    let columnTable = this._table;
+    const columnItem = this._column[key];
+    if (columnItem) {
+      if (columnItem.ref && columnItem.origin) {
+        columnKey = `${columnItem.ref}.${columnItem.origin}`;
+        columnTable = columnItem.ref;
+      } else if (columnItem.origin) {
+        columnKey = `${this._table}.${columnItem.origin}`;
+        columnTable = this._table;
+      } else {
+        columnKey = `${this._table}.${key}`;
+        columnTable = this._table;
+      }
     } else {
-      this._sqlObject.options.pageSize = null;
+      columnKey = key;
+      columnTable = this._table;
     }
-    return this;
+    return {
+      key: columnKey,
+      table: columnTable
+    };
   }
 
-  orderBy(val) {
-    this._sqlObject.append['ORDER BY'] = val || '';
-    return this;
-  }
-
-  groupBy(val) {
-    this._sqlObject.append['GROUP BY'] = val || '';
-    return this;
-  }
-
-  _createExpr(key, value, rule: { fn?: Function; op?: any; filterNull?: any; filterNullExpr?: any } = {}) {
-    let fn: Function | null | undefined = rule.fn;
-    if (rule.fn) {
-      fn = rule.fn;
-    } else {
-      fn = (val) => `${key} ${rule.op ? rule.op : '='} ${value}`;
-    }
-    if (rule.filterNull && !value) {
-      return rule.filterNullExpr || '';
-    } else {
-      return fn(key, value);
-    }
-  }
-
-  create(obj = {}, rules = {}) {
-    this.resetSqlObject();
-    const finalRules = Object.assign({}, this._updateRules, rules);
-    this._sqlObject.query = 'INSERT';
-    this._sqlObject.tables.push(this._table);
+  where(obj = {}) {
     for (const key in obj) {
-      const value = obj[key];
-      const ruleItem = finalRules[key];
-      if (ruleItem) {
-        if (ruleItem.filterNull && value) {
-          this._sqlObject.fields.push(key);
-          this._sqlObject.data.push(value);
-        }
-      } else {
-        this._sqlObject.fields.push(key);
-        this._sqlObject.data.push(value);
+      const columnItem = this._column[key];
+      const columnInfo = this.getColumnInfo(key);
+      if (this._sqlObject.table.indexOf(columnInfo.table) === -1) {
+        this._sqlObject.table.push(columnInfo.table);
       }
+      if (columnInfo.table)
+        if (columnItem.operate instanceof Function) {
+          const bindings = [];
+          this.andRawWhere(
+            columnItem.operate(columnInfo.key, obj[key], bindings),
+            bindings
+          );
+        } else {
+          let columnOperate = columnItem.operate || '=';
+          this.andWhere(columnInfo.key, obj[key], columnOperate);
+        }
     }
     return this;
   }
 
-  update(obj = {}, rules = {}) {
-    this.resetSqlObject();
-    const finalRules = Object.assign({}, this._updateRules, rules);
-    this._sqlObject.query = 'UPDATE';
-    this._sqlObject.tables.push(this._table);
-    for (const key in obj) {
-      const value = obj[key];
-      const ruleItem = finalRules[key];
-      if (ruleItem) {
-        if (ruleItem.filterNull && value) {
-          this._sqlObject.fields.push(key);
-          this._sqlObject.data.push(value);
-        }
-      } else {
-        this._sqlObject.fields.push(key);
-        this._sqlObject.data.push(value);
-      }
+  andWhere(key, value, operate = '=') {
+    const exprObj = this.exprWhere(key, value, operate);
+    const whereItem = this._sqlObject.wheres;
+    whereItem.push({
+      group: null,
+      type: 'AND',
+      sql: exprObj.sql,
+      bindings: exprObj.bindings
+    });
+    return this;
+  }
+
+  andRawWhere(sql, bindings = []) {
+    const whereItem = this._sqlObject.wheres;
+    whereItem.push({
+      group: null,
+      type: 'AND',
+      sql: sql ? sql : '',
+      bindings: bindings
+    });
+    return this;
+  }
+
+  exprWhere(key, value, operate = '=') {
+    const exprObj: any = {
+      sql: '',
+      bindings: []
+    };
+    switch (operate) {
+      case '=':
+      case '<':
+      case '>':
+      case '<=':
+      case '>=':
+      case '<>':
+        exprObj.sql = `${key} ${operate} ?`;
+        exprObj.bindings.push(value);
+        break;
+      case 'LIKE':
+      case 'NOT LIKE':
+        exprObj.sql = `${key} ${operate} ?`;
+        exprObj.bindings.push(`%${value}%`);
+        break;
+      case 'IN':
+      case 'NOT IN':
+        exprObj.sql = `${key} ${operate} (?)`;
+        exprObj.bindings = [value];
+        break;
+      case 'IS NULL':
+      case 'IS NOT NULL':
+        exprObj.sql = `${key} ${operate}`;
+        break;
+      case 'BETWEEN':
+        exprObj.sql = `${key} ${operate} ? AND ?`;
+        exprObj.bindings = value instanceof Array ? [...value] : [value, value];
+        break;
     }
+    return exprObj;
+  }
+
+  page(pageNum, pageSize) {
+    const hasPageSize = typeof pageSize === 'number';
+    const hasPageNum = typeof pageNum === 'number';
+    if (hasPageNum && hasPageSize) {
+      const offsetVal = (Number(pageNum) - 1) * Number(pageSize);
+      this._sqlObject.raws.push(`LIMIT ${pageSize} OFFSET ${offsetVal}`);
+    } else if (hasPageSize) {
+      this._sqlObject.raws.push(`LIMIT ${pageSize}`);
+    } else if (hasPageNum) {
+      this._sqlObject.raws.push(`OFFSET ${pageNum}`);
+    }
+    return this;
+  }
+
+  orderBy(key, sort = 'ASC') {
+    this._sqlObject.orders.push(`${key} ${sort}`);
+  }
+
+  insert(obj = {}) {
+    this.resetSqlObject();
+    this._sqlObject.type = 'INSERT';
+    this._sqlObject.query.push('INSERT');
+    this._sqlObject.query.push('INTO');
+    this._sqlObject.query.push(this._table);
+    this._sqlObject.end = ';';
+
+    const columnSQl: Array<string> = [];
+    const valueSQl: Array<string> = [];
+    const bindingsSql: Array<string> = [];
+    for (const key in obj) {
+      columnSQl.push(key);
+      valueSQl.push('?');
+      bindingsSql.push(obj[key]);
+    }
+    this._sqlObject.columns = columnSQl;
+    this._sqlObject.values = valueSQl;
+    return this;
+  }
+
+  update(obj = {}) {
+    this.resetSqlObject();
+    this._sqlObject.type = 'UPDATE';
+    this._sqlObject.query.push('UPDATE');
+    this._sqlObject.query.push(this._table);
+    this._sqlObject.end = ';';
+
+    const columnSQl: Array<string> = [];
+    const bindingsSql: Array<string> = [];
+    for (const key in obj) {
+      columnSQl.push(`${key} = ?`);
+      bindingsSql.push(obj[key]);
+    }
+    this._sqlObject.columns = columnSQl;
+    return this;
+  }
+
+  softRemove(obj = {}) {
+    this.update(obj);
     return this;
   }
 
   remove() {
     this.resetSqlObject();
-    this._sqlObject.query = 'DELETE';
+    this._sqlObject.type = 'DELETE';
+    this._sqlObject.query.push('DELETE');
+    this._sqlObject.query.push('FROM');
     this._sqlObject.tables.push(this._table);
-    return this;
-  }
-
-  softRemove(obj = {}, rules = {}) {
-    this.resetSqlObject();
-    this._sqlObject.query = 'UPDATE';
-    this._sqlObject.tables.push(this._table);
-    for (const key in obj) {
-      const value = obj[key];
-      this._sqlObject.fields.push(key);
-      this._sqlObject.data.push(value);
-    }
+    this._sqlObject.end = ';';
     return this;
   }
 
   count() {
-    this._sqlObject.query = 'SELECT';
-    this._sqlObject.fields = ['COUNT(*) AS total'];
+    this.resetSqlObject();
+    this._sqlObject.type = 'SELECT';
+    this._sqlObject.query.push('SELECT');
+    this._sqlObject.columns.push('COUNT(*) AS total');
+    this._sqlObject.end = ';';
     return this;
   }
 
-  valueOf() {
-    return this._table;
+  toSql() {
+    return SQLObject.toQsv(this._sqlObject);
   }
 }
 
-/*
-const User = new SQLModel({
-  table: 'user',
-  column: {
-    id: {
-      type: new SQLDataType.INTEGER(),
-      allowNull: false,
-      autoIncrement: true,
-      unique: true,
-      primaryKey: true
-    },
-    dep_id: {
-      type: new SQLDataType.INTEGER(),
-      allowNull: false,
-      primaryKey: true
-    },
-    name: {
-      type: new SQLDataType.VARCHAR(50),
-      allowNull: false
-    }
-  },
-  ref: [
-    {
-      table: 'department',
-      where: 'department.id = user.dep_id',
-      column: {}
-    }
-  ]
-})
-
-console.log(
-  User.select(['*'])
-    .addCond(
-      {
-        id: 10001,
-        name: 'ABC',
-        createAt: formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss'),
-        updateAt: 'NULL'
-      },
-      {
-        id: {
-          filterNull: true,
-          filterNullExpr: '1=1'
-        },
-        name: {
-          fn: (key, val) => `${key} LIKE %${val}%`
-        },
-        createAt: {
-          fn: (key, val) => {
-            return `(${key} >= ${formatDate(val, 'YYYY/MM/DD 00:00:00')} AND ${key} <= ${formatDate(
-              val,
-              'YYYY/MM/DD 23:59:59'
-            )} )`
-          }
-        },
-        updateAt: {
-          op: 'IS',
-          filterNull: false,
-          filterNullExpr: '1=1'
-        }
-      }
-    )
-    .sql()
-)
-
-console.log(
-  User.select(['*'])
-    .addCond(
-      {
-        id: 10001,
-        name: 'ABC'
-      },
-      {
-        id: {
-          filterNull: true,
-          filterNullExpr: '1=1'
-        },
-        name: {
-          fn: (key, val) => `${key} LIKE %${val}%`
-        }
-      }
-    )
-    .pageNum(4)
-    .pageSize(10)
-    .sql()
-)
-
-console.log(
-  User.selectOne(['*'])
-    .addCond(
-      {
-        id: 10001,
-        name: 'ABC'
-      },
-      {
-        id: {
-          filterNull: true,
-          filterNullExpr: '1=1'
-        },
-        name: {
-          fn: (key, val) => `${key} LIKE %${val}%`
-        }
-      }
-    )
-    .sql()
-)
-
-console.log(
-  User.create(
-    {
-      id: 10001,
-      name: 'ABC',
-      createAt: formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss'),
-      updateAt: 'NULL'
-    },
-    {}
-  ).sql()
-)
-
-console.log(
-  User.update(
-    {
-      id: 10001,
-      name: 'ABC',
-      createAt: formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss'),
-      updateAt: 'NULL'
-    },
-    {}
-  )
-    .addCond(
-      {
-        id: 10001
-      },
-      {
-        id: {
-          filterNull: true,
-          filterNullExpr: '1=1'
-        }
-      }
-    )
-    .sql()
-)
-
-console.log(
-  User.remove()
-    .addCond(
-      {
-        id: 10001
-      },
-      {
-        id: {
-          filterNull: true,
-          filterNullExpr: '1=1'
-        }
-      }
-    )
-    .sql()
-)
-
-console.log(
-  User.softRemove({
-    enable: -1
-  })
-    .addCond(
-      {
-        id: 10001
-      },
-      {
-        id: {
-          filterNull: true,
-          filterNullExpr: '1=1'
-        }
-      }
-    )
-    .sql()
-)
-
-console.log(
-  User.count()
-    .addCond(
-      {
-        id: 10001
-      },
-      {
-        id: {
-          filterNull: true,
-          filterNullExpr: '1=1'
-        }
-      }
-    )
-    .sql()
-)
-
-console.log(User.getCreateTableSql())
-console.log(User.getDropTableSql())
-*/
-// LIMIT (pageNo - 1) * pageSize, pageSize;
-// LIMIT pageSize OFFSET (pageNo - 1) * pageSize;
-
-export { SQLModelDef, SQLModel };
+export { SQLModel };

@@ -1,16 +1,16 @@
 const { routePrefixMather } = require('../dist/utils/routeMatch')
 
-describe('[routePrefixMather]:/api', () => {
+describe('[Matched:/api/]', () => {
     const matcher = routePrefixMather('/api/');
-    test('matched', () => {
+    test('/api/index with {}', () => {
         expect(matcher('/api/index')).toStrictEqual({});
     });
 
-    test('matched self', () => {
-        expect(matcher('/api/')).toStrictEqual({});
+    test('/api/', () => {
+        expect(matcher('/api/ with {}')).toStrictEqual({});
     });
 
-    test('not matched', () => {
+    test('/api with false', () => {
         expect(matcher('/api')).toBe(false);
     });
 });
