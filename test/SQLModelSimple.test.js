@@ -110,12 +110,12 @@ const UserModel = new SQLModel({
 describe('[SQLModel].create_drop', () => {
   test('User.create().toSql()', () => {
     let sql =
-      'CREATE TABLE IF NOT EXISTS user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
+      'CREATE TABLE IF NOT EXISTS user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, group VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
     expect(User.create().toSql().sql).toBe(sql);
   });
   test('User.create(true).toSql()', () => {
     let sql =
-      'CREATE TABLE user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
+      'CREATE TABLE user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, group VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
     expect(User.create(true).toSql().sql).toBe(sql);
   });
   test('User.drop().toSql()', () => {
