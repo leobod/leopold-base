@@ -86,9 +86,15 @@ class Leopold {
     }
   }
 
-  use(fn) {
+  registerAppModule(fn) {
     if (fn instanceof Function) {
       fn(this, this.app);
+    }
+  }
+
+  registerServerModule(fn) {
+    if (fn instanceof Function) {
+      this.app.use(fn)
     }
   }
 

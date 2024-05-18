@@ -17,4 +17,5 @@ export { RedisRDB } from './tools/RedisRDB';
 export { SQLModel } from './model/SQLModel';
 export { SQLModelType } from './model/SQLModelType';
 export { SQLObject } from './model/SQLObject';
-export { formatSql } from './utils/formater'
+export { routePrefixMather } from './utils/routeMatch';
+export { formatSql } from './utils/formater';
