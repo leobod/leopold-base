@@ -14,6 +14,7 @@ class SQLModel {
       defaultExpr?: any;
       comment?: any;
       rawExpr?: any;
+      // 有ref 及为关联字段，或者别名字段
       ref?: any;
       origin?: any;
       operate: any;
@@ -122,7 +123,7 @@ class SQLModel {
       if (fields === '*') fieldKeyList = Object.keys(this._column);
       else fieldKeyList = [fields];
     }
-    const tableKeyList: Array<string> = [];
+    const tableKeyList: Array<string> = [this._table];
     for (const key of fieldKeyList) {
       const columnItem = this._column[key];
       if (columnItem) {
@@ -132,8 +133,6 @@ class SQLModel {
             tableKeyList.push(columnItem.ref);
           }
           columnItemSql.push(`${columnItem.ref}.${columnItem.origin}`);
-        } else if (columnItem.origin) {
-          columnItemSql.push(`${this._table}.${columnItem.origin}`);
         } else {
           columnItemSql.push(`${this._table}.${key}`);
         }
@@ -151,8 +150,15 @@ class SQLModel {
         });
       }
     }
-    this._sqlObject.table = [this._table, ...tableKeyList];
+    this._sqlObject.table = tableKeyList
     return this;
+  }
+
+  selectRaw(sql) {
+    if (sql) {
+      this._sqlObject.columns.push(sql);
+    }
+    return this
   }
 
   selectOne(fields: Array<string> | string = '*') {
@@ -161,23 +167,17 @@ class SQLModel {
   }
 
   getColumnInfo(key) {
-    let columnKey = key;
-    let columnTable = this._table;
+    let columnKey = '';
+    let columnTable = '';
     const columnItem = this._column[key];
     if (columnItem) {
       if (columnItem.ref && columnItem.origin) {
         columnKey = `${columnItem.ref}.${columnItem.origin}`;
         columnTable = columnItem.ref;
-      } else if (columnItem.origin) {
-        columnKey = `${this._table}.${columnItem.origin}`;
-        columnTable = this._table;
       } else {
         columnKey = `${this._table}.${key}`;
         columnTable = this._table;
       }
-    } else {
-      columnKey = key;
-      columnTable = this._table;
     }
     return {
       key: columnKey,
@@ -189,20 +189,30 @@ class SQLModel {
     for (const key in obj) {
       const columnItem = this._column[key];
       const columnInfo = this.getColumnInfo(key);
-      if (this._sqlObject.table.indexOf(columnInfo.table) === -1) {
-        this._sqlObject.table.push(columnInfo.table);
-      }
-      if (columnInfo.table)
-        if (columnItem.operate instanceof Function) {
+      if (columnInfo.table) {
+        // 处理关联where
+        if (this._sqlObject.table.indexOf(columnInfo.table) === -1) {
+          this._sqlObject.table.push(columnInfo.table);
+          const tableRefWhere = this._ref[columnInfo.table];
+          if (tableRefWhere) {
+            this._sqlObject.wheres.push({
+              type: 'AND',
+              value: tableRefWhere
+            });
+          }
+        }
+        // 处理当前字段where
+        let columnOperate = columnItem.operate || '=';
+        if (columnOperate instanceof Function) {
           const bindings = [];
           this.andRawWhere(
-            columnItem.operate(columnInfo.key, obj[key], bindings),
-            bindings
+              columnOperate(columnInfo.key, obj[key], bindings),
+              bindings
           );
         } else {
-          let columnOperate = columnItem.operate || '=';
           this.andWhere(columnInfo.key, obj[key], columnOperate);
         }
+      }
     }
     return this;
   }
@@ -303,6 +313,7 @@ class SQLModel {
     }
     this._sqlObject.columns = columnSQl;
     this._sqlObject.values = valueSQl;
+    this._sqlObject.bindings = bindingsSql;
     return this;
   }
 
@@ -320,6 +331,7 @@ class SQLModel {
       bindingsSql.push(obj[key]);
     }
     this._sqlObject.columns = columnSQl;
+    this._sqlObject.bindings = bindingsSql;
     return this;
   }
 
@@ -333,7 +345,7 @@ class SQLModel {
     this._sqlObject.type = 'DELETE';
     this._sqlObject.query.push('DELETE');
     this._sqlObject.query.push('FROM');
-    this._sqlObject.tables.push(this._table);
+    this._sqlObject.query.push(this._table);
     this._sqlObject.end = ';';
     return this;
   }

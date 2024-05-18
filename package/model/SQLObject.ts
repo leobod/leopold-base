@@ -30,7 +30,7 @@ const toQsv = function (model) {
   const type = model.type.toUpperCase();
   const sql: Array<String> = [];
   const hasWhere = !!(model.wheres && model.wheres.length > 0);
-  const bindings: Array<any> = [];
+  const bindings: Array<any> = model.bindings || [];
   const whereSql: Array<string> = [];
   switch (model.type) {
     case 'CREATE':
@@ -67,7 +67,7 @@ const toQsv = function (model) {
       break;
     case 'UPDATE':
       sql.push(model.query.join(' '));
-      sql.push('SET ' + model.columns.join(', ') + ')');
+      sql.push('SET ' + model.columns.join(', '));
       for (const item of model.wheres) {
         if (whereSql.length === 0) {
           whereSql.push(`WHERE ${item.sql}`);

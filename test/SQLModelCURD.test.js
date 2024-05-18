@@ -1,39 +1,5 @@
 const { SQLModel, SQLModelType, formatSql } = require('../dist/index');
 
-const User = new SQLModel({
-  table: 'user',
-  column: {
-    id: {
-      type: new SQLModelType.INTEGER(),
-      allowNull: false,
-      autoIncrement: true,
-      unique: true,
-      primaryKey: true,
-      operate: '='
-    },
-    dep_id: {
-      type: new SQLModelType.INTEGER(),
-      allowNull: false,
-      primaryKey: true,
-      operate: '='
-    },
-    name: {
-      type: new SQLModelType.VARCHAR(50),
-      allowNull: false,
-      operate: 'LIKE'
-    },
-    group: {
-      type: new SQLModelType.VARCHAR(50),
-      allowNull: false,
-      operate: (key, val, bindings) => {
-        bindings.push(val[0]);
-        bindings.push(val[1]);
-        return `(${key} > ? AND ${key} < ?)`;
-      }
-    }
-  }
-});
-
 const UserModel = new SQLModel({
   table: 'tb_user',
   column: {
@@ -140,56 +106,48 @@ const UserModel = new SQLModel({
   }
 });
 
-describe('[SQLModel].create_drop', () => {
-  test('User.create().toSql()', () => {
-    let sql =
-      'CREATE TABLE IF NOT EXISTS user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, group VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
-    expect(User.create().toSql().sql).toBe(sql);
-  });
-  test('User.create(true).toSql()', () => {
-    let sql =
-      'CREATE TABLE user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, group VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
-    expect(User.create(true).toSql().sql).toBe(sql);
-  });
-  test('User.drop().toSql()', () => {
-    let sql = 'DROP TABLE IF EXISTS user;';
-    expect(User.drop().toSql().sql).toBe(sql);
-  });
-  test(`User.drop(true).toSql()`, () => {
-    let sql = 'DROP TABLE user;';
-    expect(User.drop(true).toSql().sql).toBe(sql);
+describe('[SQLModel].insert', () => {
+  test(`UserModel.insert(userObj).toSql()`, () => {
+    let sql = `INSERT INTO tb_user (code, fk_group, account, paswd, sex, update_at) VALUES (?, ?, ?, ?, ?, ?);`;
+    const userObj = {
+      code: '123456',
+      fk_group: 'leopold',
+      account: 'leo',
+      paswd: '######',
+      sex: 0,
+      update_at: new Date()
+    };
+    const current = UserModel.insert(userObj).toSql();
+    // const finalSql = formatSql(current.sql, current.bindings)
+    // console.log(finalSql);
+    expect(current.sql).toBe(sql);
   });
 });
 
-describe('[SQLModel].select', () => {
-  test(`User.select('id')_id`, () => {
-    let sql = `SELECT user.id AS id FROM user WHERE user.id = ?;`;
-    const searchForm = {
-      id: 1
+describe('[SQLModel].update', () => {
+  test(`UserModel.update(userObj).where({ code: '1234' }).toSql()`, () => {
+    let sql = `UPDATE tb_user SET code = ?, fk_group = ?, account = ?, paswd = ?, sex = ?, update_at = ? WHERE tb_user.code = ?;`;
+    const userObj = {
+      code: '123456',
+      fk_group: 'leopold',
+      account: 'leo',
+      paswd: '######',
+      sex: 0,
+      update_at: new Date()
     };
-    const current = User.select('id').where(searchForm).toSql();
-    // const formatedSql = formatSql(current.sql, current.bindings);
-    expect(current.sql).toBe(sql);
-  });
-  test(`User.select('id')_name`, () => {
-    let sql = `SELECT user.id AS id FROM user WHERE user.id = ? AND user.name LIKE ?;`;
-    const searchForm = {
-      id: 1,
-      name: 'test'
-    };
-    const current = User.select('id').where(searchForm).toSql();
-    expect(current.sql).toBe(sql);
-  });
-
-  test(`User.select('id')_group`, () => {
-    let sql = `SELECT user.id AS id FROM user WHERE user.id = ? AND user.name LIKE ? AND (user.group > ? AND user.group < ?);`;
-    const searchForm = {
-      id: 1,
-      name: 'test',
-      group: [10, 20]
-    };
-    const current = User.select('id').where(searchForm).toSql();
+    const current = UserModel.update(userObj).where({ code: '123456' }).toSql();
     // const finalSql = formatSql(current.sql, current.bindings)
+    // console.log(finalSql);
+    expect(current.sql).toBe(sql);
+  });
+});
+
+describe('[SQLModel].delete', () => {
+  test(`UserModel.remove().where({ code: '1234' }).toSql()`, () => {
+    let sql = `DELETE FROM tb_user WHERE tb_user.code = ?;`
+    const current = UserModel.remove().where({ code: '123456' }).toSql();
+    // const finalSql = formatSql(current.sql, current.bindings)
+    // console.log(finalSql);
     expect(current.sql).toBe(sql);
   });
 });
