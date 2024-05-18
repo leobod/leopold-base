@@ -1,5 +1,4 @@
 import schedule from 'node-schedule';
-import { Server } from 'http';
 
 /*
 *    *    *    *    *    *
@@ -82,17 +81,14 @@ class ScheduleManager {
   }
 }
 
-class Schedule {
+class ScheduleFactory {
   public static instance: ScheduleManager | null = null;
 
   public static onCreate = function (config = {}) {
     const instance: ScheduleManager = new ScheduleManager();
-    Schedule.instance = instance;
+    ScheduleFactory.instance = instance;
     return instance;
   };
 }
-const useSchedule = function () {
-  return Schedule.instance;
-};
 
-export { Schedule, useSchedule };
+export { ScheduleFactory };

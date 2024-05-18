@@ -10,15 +10,15 @@ interface CompressConfig {
 export const Compress = {
   /**
    * 加载Compress
+   * @param root
    * @param app
-   * @param server
    * @param config
    */
-  onLoad: function (app, server, config: CompressConfig = {}) {
+  onLoad: function (root, app, config: CompressConfig = {}) {
     const { match = '/', opts = {} } = config;
     const matcher = routePrefixMather(match);
     const finalOpts = Object.assign({}, opts);
-    server.use(async (ctx, next) => {
+    app.use(async (ctx, next) => {
       if (matcher(ctx.url)) {
         await compress(finalOpts)(ctx, next);
       } else {

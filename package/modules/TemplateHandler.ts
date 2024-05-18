@@ -9,13 +9,13 @@ interface TemplateHandlerConfig {
 export const TemplateHandler = {
   /**
    * 记载视图渲染
+   * @param root
    * @param app
-   * @param server
    * @param config
    */
-  onLoad: function (app, server, config: TemplateHandlerConfig = {}) {
+  onLoad: function (root, app, config: TemplateHandlerConfig = {}) {
     const { mapping = './template', opts = {} } = config;
     const finalOpts = Object.assign({}, opts);
-    server.use(views(p.join(process.cwd(), mapping), finalOpts));
+    app.use(views(p.join(process.cwd(), mapping), finalOpts));
   }
 };

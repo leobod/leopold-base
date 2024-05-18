@@ -30,7 +30,11 @@ class ResultManager {
     return this[key] || null;
   }
 
-  success(data: any, msg: string = this.SUCCESS.msg, code: number = this.SUCCESS.errCode) {
+  success(
+    data: any,
+    msg: string = this.SUCCESS.msg,
+    code: number = this.SUCCESS.errCode
+  ) {
     return {
       code,
       msg,
@@ -38,7 +42,11 @@ class ResultManager {
     };
   }
 
-  fail(data: any, msg: string = this.UNKNOWN_ERROR.msg, code: number = this.UNKNOWN_ERROR.errCode) {
+  fail(
+    data: any,
+    msg: string = this.UNKNOWN_ERROR.msg,
+    code: number = this.UNKNOWN_ERROR.errCode
+  ) {
     return {
       code,
       msg,
@@ -47,7 +55,7 @@ class ResultManager {
   }
 }
 
-class Result {
+class ResultFactory {
   public static instance: ResultManager | null = null;
 
   public static onCreate(config = {}) {
@@ -55,13 +63,9 @@ class Result {
     for (const key in config) {
       resultManager.setStatusCode(key, config[key]);
     }
-    Result.instance = resultManager;
+    ResultFactory.instance = resultManager;
     return resultManager;
   }
 }
 
-const useResult = function () {
-  return Result.instance;
-};
-
-export { Result, useResult };
+export { ResultFactory };

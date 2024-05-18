@@ -1,16 +1,14 @@
 import http, { Server, IncomingMessage, ServerResponse } from 'http';
 import Koa from 'koa';
-import { Websocket } from '../plugins/Websocket';
-import { Logger } from '../plugins/Logger';
-import { Result } from '../plugins/Result';
-import { Schedule } from '../plugins/Schedule';
-import { Db } from '../plugins/Db';
 import p from 'path';
-import { defaultMiddlewares, Middleware } from '../middleware';
-import { isEmpty } from '../utils/obj';
-import _ from 'lodash';
-import log4js from 'koa-log4';
-import templateConfig from '../leopold.template.config';
+import * as modules from '../modules';
+import templateConfig from '../config';
+
+interface LeopoldConfig {
+  path?: string;
+  port?: number;
+  modules?: Object;
+}
 
 /**
  * 应用程序
@@ -18,71 +16,62 @@ import templateConfig from '../leopold.template.config';
  */
 class Leopold {
   public static instance: Leopold | null = null;
-
   public config: any;
   public app: Koa;
   public server: Server<typeof IncomingMessage, typeof ServerResponse>;
-  public websocket: any;
-  public log: any;
   public result: any;
-  public schedule: any;
-  public db: any;
 
-  constructor(config = { path: '' }) {
+  constructor(config: LeopoldConfig = { path: '.' }) {
     // 初始化参数
-    this.config = _.merge({}, templateConfig, config);
-    this.config.path = p.join(process.cwd(), config.path);
+    this.config = templateConfig;
+    const projectPath = config.path ? config.path : '.';
+    this.config.path = p.join(process.cwd(), projectPath);
+    this.config.port = config.port || 8360;
+
+    const defaultConfig = this.config.modules;
+    const userConfig = config.modules || {};
+    for (const key in userConfig) {
+      defaultConfig[key] = Object.assign({}, defaultConfig[key], userConfig[key]);
+    }
     // 初始化服务
     this.app = new Koa();
     this.server = http.createServer(this.app.callback());
-    this.websocket = Websocket.onCreate(this.server);
-    // 加载插件
-    const pluginsOpts = this.config.plugins || {};
-    this.log = Logger.onCreate(pluginsOpts.Logger);
-    this.result = Result.onCreate(pluginsOpts.Result);
-    this.schedule = Schedule.onCreate(pluginsOpts.Schedule);
-    this.db = Db.onCreate(pluginsOpts.Db);
-    // 加载日志
     this.app.use(async (ctx, next) => {
-      ctx.set('leopold', 'v0.0.7');
-      ctx.set('PoweredBy', 'leopold');
       ctx.leopold = this;
-      ctx.log = this.log;
-      ctx.result = this.result;
-      ctx.schedule = this.schedule;
-      ctx.db = this.db;
-      ctx.getItem = (field) => {
-        if (this[field]) return this[field];
-        return null;
-      };
       await next();
     });
-    const accessLogger = () => log4js.koaLogger(log4js.getLogger('access'));
-    this.app.use(accessLogger());
-    // 加载中间件
     Leopold.instance = this;
   }
 
   load(arrs: Array<string> | string = 'default', config = {}) {
-    const middlewareConfig = this.config.middlewares || {};
+    const defaultMiddlewares = [
+      'AppLog',
+      'Db',
+      'Result',
+      'Schedule',
+      'Websocket',
+      'Cors',
+      'BodyParser',
+      'Compress',
+      'Assets'
+    ];
+    const modulesConfig = this.config.modules || {};
     let willLoadedKeys: Array<string> = [];
-    if (!isEmpty(middlewareConfig)) {
-      const middlewareKeys = Object.keys(middlewareConfig);
-      if (typeof arrs === 'string') {
-        if (arrs === 'default') willLoadedKeys = [...defaultMiddlewares];
-        else willLoadedKeys = [arrs];
-      }
-      if (arrs instanceof Array) {
-        for (const key of arrs) {
-          if (middlewareKeys.indexOf(key) !== -1) {
-            willLoadedKeys.push(key);
-          }
+    const middlewareKeys = Object.keys(modules);
+    if (typeof arrs === 'string') {
+      if (arrs === 'default') willLoadedKeys = defaultMiddlewares;
+      else willLoadedKeys = [arrs];
+    }
+    if (arrs instanceof Array) {
+      for (const key of arrs) {
+        if (middlewareKeys.indexOf(key) !== -1) {
+          willLoadedKeys.push(key);
         }
       }
-      for (const key of willLoadedKeys) {
-        const finalConfig = _.merge({}, middlewareConfig[key], config);
-        Middleware[key].onLoad(this, this.app, finalConfig);
-      }
+    }
+    for (const key of willLoadedKeys) {
+      const finalConfig = Object.assign({}, modulesConfig[key], config);
+      modules[key].onLoad(this, this.app, finalConfig);
     }
   }
 
@@ -94,7 +83,7 @@ class Leopold {
 
   registerServerModule(fn) {
     if (fn instanceof Function) {
-      this.app.use(fn)
+      this.app.use(fn);
     }
   }
 
@@ -115,8 +104,4 @@ class Leopold {
   }
 }
 
-const useLeopold = function () {
-  return Leopold.instance;
-};
-
-export { Leopold, useLeopold };
+export { Leopold };

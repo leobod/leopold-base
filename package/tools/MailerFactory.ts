@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import _ from 'lodash';
 
 class Mailer {
   private config: any;
@@ -15,7 +14,7 @@ class Mailer {
       },
       secure: false
     };
-    this.config = _.merge({}, emailConfigTemplate, config);
+    this.config = Object.assign({}, emailConfigTemplate, config);
     this.config.secure = Number(this.config.port) === 465;
     this.mailer = nodemailer.createTransport(this.config);
   }

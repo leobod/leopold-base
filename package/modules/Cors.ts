@@ -9,14 +9,14 @@ interface CorsConfig {
 export const Cors = {
   /**
    * 加载Cors
+   * @param root
    * @param app
-   * @param server
    * @param config
    */
-  onLoad: function (app, server, config: CorsConfig = {}) {
+  onLoad: function (root, app, config: CorsConfig = {}) {
     const { match = '/', opts = {} } = config;
     const matcher = routePrefixMather(match);
-    server.use(async (ctx, next) => {
+    app.use(async (ctx, next) => {
       if (matcher(ctx.url)) {
         if (!isEmpty(opts)) {
           for (const key in opts) {

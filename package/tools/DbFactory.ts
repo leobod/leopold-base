@@ -1,6 +1,6 @@
-import { MysqlRDB } from '../tools/MysqlRDB';
-import { RedisRDB } from '../tools/RedisRDB';
 import { isEmpty } from '../utils/obj';
+import { MysqlRDB } from './MysqlRDB';
+import { RedisRDB } from './RedisRDB';
 
 class DbManager {
   constructor() {}
@@ -13,7 +13,7 @@ class DbManager {
   }
 }
 
-class Db {
+class DbFactory {
   public static instance: DbManager | null = null;
 
   public static onCreate(config = {}) {
@@ -29,13 +29,9 @@ class Db {
         }
       }
     }
-    Db.instance = dbManager;
+    DbFactory.instance = dbManager;
     return dbManager;
   }
 }
 
-const useDb = function () {
-  return Db.instance;
-};
-
-export { Db, useDb };
+export { DbFactory };

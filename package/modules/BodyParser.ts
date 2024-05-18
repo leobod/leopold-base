@@ -10,11 +10,11 @@ interface BodyParserConfig {
 export const BodyParser = {
   /**
    * 加载BodyParser
+   * @param root
    * @param app
-   * @param server
    * @param config
    */
-  onLoad: function (app, server, config: BodyParserConfig = {}) {
+  onLoad: function (root, app, config: BodyParserConfig = {}) {
     const { match = '/', opts = {} } = config;
     const matcher = routePrefixMather(match);
     const finalOpts = Object.assign(
@@ -28,7 +28,7 @@ export const BodyParser = {
       // },
       opts
     );
-    server.use(async (ctx, next) => {
+    app.use(async (ctx, next) => {
       if (matcher(ctx.url)) {
         await KoaBody(finalOpts)(ctx, next);
       } else {

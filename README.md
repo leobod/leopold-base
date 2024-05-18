@@ -34,7 +34,7 @@ const p = require('path');
 module.exports = {
   path: '.',
   port: 8360,
-  plugins: {
+  modules: {
     Db: {
       // mysql: {
       //   type: 'MYSQL',
@@ -65,39 +65,6 @@ module.exports = {
       //   msgZh: '未知异常'
       // }
     },
-    Logger: {
-      // 日志的输出
-      appenders: {
-        access: {
-          type: 'dateFile',
-          pattern: '-yyyy-MM-dd.log', //生成文件的规则
-          alwaysIncludePattern: true, // 文件名始终以日期区分
-          encoding: 'utf-8',
-          filename: p.join(process.cwd(), './logs/access'), //生成文件名
-          maxLogSize: 5 * 1000 * 1000, // 超过多少(byte)就切割
-          keepFileExt: true // 切割的日志保留文件扩展名，false(默认):生成类似default.log.1文件;true:生成类似default.1.log
-        },
-        application: {
-          type: 'dateFile',
-          pattern: '-yyyy-MM-dd.log',
-          alwaysIncludePattern: true,
-          encoding: 'utf-8',
-          filename: p.join(process.cwd(), './logs/application'),
-          maxLogSize: 5 * 1000 * 1000,
-          keepFileExt: true
-        },
-        out: {
-          type: 'console'
-        }
-      },
-      categories: {
-        access: { appenders: ['access'], level: 'info' },
-        application: { appenders: ['application'], level: 'all' },
-        default: { appenders: ['application'], level: 'all' }
-      }
-    }
-  },
-  middlewares: {
     Cors: {
       match: '/',
       opts: {
@@ -142,7 +109,7 @@ module.exports = {
       opts: { extension: 'ejs' }
     },
     DynamicRoutes: {
-      opts: [{ match: '/api', dir: '/api' }]
+      opts: [{ match: '/api/', dir: '/api' }]
     }
   }
 };
@@ -693,18 +660,6 @@ const UserModel = new SQLModel({
 });
 
 module.exports = UserModel;
-```
-
-## Log使用范例
-
-```javascript
-// server/index.js
-module.exports = async (ctx) => {
-  const { Result, Log } = ctx.$root;
-  const logger = Log.getLogger('application')
-  logger.info('写入信息到log')
-  ctx.body = Result.success(ctx, 'success');
-};
 ```
 
 ## fix记录

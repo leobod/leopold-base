@@ -1,8 +1,9 @@
 const { Leopold } = require('../../dist/index');
-const config = require('./app.config');
 
-const leopold = new Leopold(config);
+const leopold = new Leopold();
 leopold.load();
+leopold.load('TemplateHandler')
+leopold.load('DynamicRoutes');
 
 leopold.app.use(async (ctx, next) => {
     try {

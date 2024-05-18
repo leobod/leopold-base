@@ -7,15 +7,14 @@ interface DynamicRoutesConfig {
 }
 
 const getRenderFilePath = async (
+  root,
   app,
-  server,
   config: DynamicRoutesConfig = { opts: [] }
 ) => {
   const { opts } = config;
   const routeList = opts ? opts : [];
   let routeFileList: Array<any> = [];
   for (const item of routeList) {
-
     const currentDir = p.join(process.cwd(), item.dir);
     const fileList = globSync(['**/*.js'], {
       ignore: 'node_modules/**',
@@ -29,20 +28,20 @@ const getRenderFilePath = async (
         .replace(/\[/g, ':')
         .replace(/\\/g, '/')
         .replace(/.js/g, '');
-      let matchedKey = ''
+      let matchedKey = '';
       if (fileItemPath.endsWith('index')) {
         const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
-        matchedKey = `${item.match === '/' ? '' : item.match}${indexFilePath}`
-        const originFilePath = p.join(process.cwd(), item.dir, fileItem)
+        matchedKey = `${item.match === '/' ? '' : item.match}${indexFilePath}`;
+        const originFilePath = p.join(process.cwd(), item.dir, fileItem);
         const fn = require(decodeURIComponent(originFilePath));
-        fileListPost[matchedKey] = fn
-        matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`
-        fileListPost[matchedKey] = fn
+        fileListPost[matchedKey] = fn;
+        matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`;
+        fileListPost[matchedKey] = fn;
       } else {
-        matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`
-        const originFilePath = p.join(process.cwd(), item.dir, fileItem)
+        matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`;
+        const originFilePath = p.join(process.cwd(), item.dir, fileItem);
         const fn = require(decodeURIComponent(originFilePath));
-        fileListPost[matchedKey] = fn
+        fileListPost[matchedKey] = fn;
       }
     }
     routeFileList.push({
@@ -51,9 +50,8 @@ const getRenderFilePath = async (
       isLeaf: false,
       children: fileListPost
     });
-
   }
-  app.routes = routeFileList;
+  root.routes = routeFileList;
 };
 
 const renderMatch = async (ctx, next) => {
@@ -61,13 +59,13 @@ const renderMatch = async (ctx, next) => {
   const leopold = ctx.leopold;
   for (const group of leopold.routes) {
     if (group.match(parsedUrl.pathname)) {
-      const fn = group.children[parsedUrl.pathname]
+      const fn = group.children[parsedUrl.pathname];
       if (fn) {
         ctx.status = 200;
         await fn(ctx);
         break;
       } else {
-        ctx.status = 404
+        ctx.status = 404;
         break;
       }
     }
@@ -77,12 +75,12 @@ const renderMatch = async (ctx, next) => {
 export const DynamicRoutes = {
   /**
    * 加载动态路由
-   * @param leopold
+   * @param root
    * @param app
    * @param config
    */
-  onLoad: function (leopold, app, config: DynamicRoutesConfig = { opts: [] }) {
-    getRenderFilePath(leopold, app, config);
+  onLoad: function (root, app, config: DynamicRoutesConfig = { opts: [] }) {
+    getRenderFilePath(root, app, config);
     app.use(renderMatch);
   }
 };

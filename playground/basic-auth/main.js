@@ -1,5 +1,4 @@
 const { Leopold, routePrefixMather } = require('../../dist/index');
-const config = require('./app.config');
 
 const decodeBase64 = function (str) {
   return Buffer.from(str, 'base64').toString();
@@ -19,7 +18,7 @@ const auth = function (authorization) {
   return false;
 };
 
-const leopold = new Leopold(config);
+const leopold = new Leopold();
 leopold.load();
 leopold.registerServerModule((ctx, next) => {
   const matcher = routePrefixMather('/api/');

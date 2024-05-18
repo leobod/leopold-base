@@ -11,11 +11,11 @@ interface AssetsConfig {
 export const Assets = {
   /**
    * 加载Assets
+   * @param root
    * @param app
-   * @param server
    * @param config  { path, mapping, opts }
    */
-  onLoad: function (app, server, config: AssetsConfig = {}) {
+  onLoad: function (root, app, config: AssetsConfig = {}) {
     const { match = '/', mapping = './static', opts = {} } = config;
     const assetsOpts = Object.assign(
       {},
@@ -26,6 +26,6 @@ export const Assets = {
       // },
       opts
     );
-    server.use(KoaMount(match, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
+    app.use(KoaMount(match, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
   }
 };
