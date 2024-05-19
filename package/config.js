@@ -67,11 +67,11 @@ module.exports = {
       }
     },
     TemplateHandler: {
-      mapping: './template',
+      mapping: '/server/template',
       opts: { extension: 'ejs' }
     },
     DynamicRoutes: {
-      opts: [{ match: '/api/', dir: '/api' }]
+      opts: [{ match: '/api/', dir: '/server/api' }]
     }
   }
 };

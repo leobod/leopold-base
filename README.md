@@ -98,7 +98,7 @@ module.exports = {
       }
     },
     TemplateHandler: {
-      mapping: './template',
+      mapping: '/server/template',
       opts: { extension: 'ejs' }
     },
     DynamicRoutes: {
@@ -648,5 +648,5 @@ module.exports = UserModel;
   - 2024/05/13 针对性的路由插件处理,提供默认加载的插件方式，和后期开放性的内置可选插件加载方式
   - 2024/05/15 动态路由匹配规则优化与精简，补充playground，说明如何使用库文件
   - 2024/05/18 精简配置，与sqlModel的定义
-- 0.0.8
+- 0.0.9
   - 2024/05/19 修改默认api文件夹路径，简化result设置与使用
