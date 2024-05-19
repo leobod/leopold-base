@@ -17,7 +17,6 @@ export { TemplateHandler } from './modules/TemplateHandler';
 export { Websocket } from './modules/Websocket';
 
 export { DbFactory } from './tools/DbFactory';
-export { ResultFactory } from './tools/ResultFactory';
 export { ScheduleFactory } from './tools/ScheduleFactory';
 export { WebsocketFactory } from './tools/WebsocketFactory';
 export { MysqlRDB } from './tools/MysqlRDB';

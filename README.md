@@ -9,21 +9,21 @@
 
 ## 当前集成插件
 
-+ [x] Cors跨域请求处理(简易版)
-+ [x] 静态文件(基于koa-mount，koa-static，并提供有限的配置自定义)
-+ [x] Log4j日志系统(简易版)
-+ [x] 请求体处理(基于koa-body，并提供有限的配置自定义)
-+ [x] 页面压缩
-+ [x] 模板引擎(基于ejs)
-+ [x] 动态路由自动注册(使用path-match定制)
+- [x] Cors跨域请求处理(简易版)
+- [x] 静态文件(基于koa-mount，koa-static，并提供有限的配置自定义)
+- [x] Log4j日志系统(简易版)
+- [x] 请求体处理(基于koa-body，并提供有限的配置自定义)
+- [x] 页面压缩
+- [x] 模板引擎(基于ejs)
+- [x] 动态路由自动注册(使用path-match定制)
 
 ## 提供的工具
 
-+ [x] 统一返回结果处理
-+ [x] 定时任务设置
-+ [x] Redis的集成使用
-+ [x] Mysql的集成使用
-+ [x] 基于数据模型的数据库CURD
+- [x] 统一返回结果处理
+- [x] 定时任务设置
+- [x] Redis的集成使用
+- [x] Mysql的集成使用
+- [x] 基于数据模型的数据库CURD
 
 ## 配置文件范例
 
@@ -56,13 +56,6 @@ module.exports = {
       //     port: '6379',
       //     maxConnections: 5 // 最大连接数
       //   }
-      // }
-    },
-    Result: {
-      // UNKNOWN_ERROR: {
-      //   errCode: -1,
-      //   msg: 'UNKNOWN_ERROR',
-      //   msgZh: '未知异常'
       // }
     },
     Cors: {
@@ -109,17 +102,15 @@ module.exports = {
       opts: { extension: 'ejs' }
     },
     DynamicRoutes: {
-      opts: [{ match: '/api/', dir: '/api' }]
+      opts: [{ match: '/api/', dir: '/server/api' }]
     }
   }
 };
-
 ```
 
 ## 程序使用
 
 ```javascript
-
 // main.js
 // 默认 localhost:8360
 const { Leopold } = require('@eside/leopold');
@@ -134,8 +125,8 @@ leopold.server.use(router.routes(), router.allowedMethods());
 leopold.start();
 ```
 
-
 ## CURD 范例
+
 ```javascript
 // dayjs.js
 const dayjs = require('dayjs');
@@ -158,23 +149,23 @@ const formatDate = (d, format = 'YYYY/MM/DD HH:mm:ss') => {
  * @returns {*}
  */
 const filterDbResult = (dbResult, filter) => {
-    if (dbResult) {
-        return dbResult.map((item) => {
-            for (const key in filter) {
-                const filterFn = filter[key];
-                if (item[key] !== undefined && item[key] !== null) {
-                    item[key] = filterFn(item[key], item) || item[key];
-                }
-            }
-            return item;
-        });
-    } else {
-        return [];
-    }
+  if (dbResult) {
+    return dbResult.map((item) => {
+      for (const key in filter) {
+        const filterFn = filter[key];
+        if (item[key] !== undefined && item[key] !== null) {
+          item[key] = filterFn(item[key], item) || item[key];
+        }
+      }
+      return item;
+    });
+  } else {
+    return [];
+  }
 };
 
 module.exports = {
-    filterDbResult
+  filterDbResult
 };
 
 // validator.js
@@ -184,24 +175,27 @@ module.exports = {
  * @returns {{}}
  */
 const getRequiredRules = (model) => {
-    let validator = {};
-    for (const key in model._column) {
-        validator[key] = [];
-        const columnItem = model._column[key];
-        if (columnItem.primaryKey || (columnItem.allowNull !== void 0 && !columnItem.allowNull)) {
-            if (!columnItem.defaultExpr) {
-                const requiredFn = (val) => {
-                    if (val) return true;
-                    else return false;
-                };
-                validator[key].push({
-                    message: `字段${key}需要必填，请检查输入`,
-                    fn: requiredFn
-                });
-            }
-        }
+  let validator = {};
+  for (const key in model._column) {
+    validator[key] = [];
+    const columnItem = model._column[key];
+    if (
+      columnItem.primaryKey ||
+      (columnItem.allowNull !== void 0 && !columnItem.allowNull)
+    ) {
+      if (!columnItem.defaultExpr) {
+        const requiredFn = (val) => {
+          if (val) return true;
+          else return false;
+        };
+        validator[key].push({
+          message: `字段${key}需要必填，请检查输入`,
+          fn: requiredFn
+        });
+      }
     }
-    return validator;
+  }
+  return validator;
 };
 
 /**
@@ -211,27 +205,26 @@ const getRequiredRules = (model) => {
  * @returns {[boolean,string]}
  */
 const validateRules = (params = {}, rules = {}) => {
-    let err = false;
-    let errMsg = '';
-    for (const key in rules) {
-        const validList = rules[key];
-        if (validList && validList.length > 0) {
-            for (const validItem of validList) {
-                if (!validItem.fn(params[key])) {
-                    err = true;
-                    errMsg = validItem.message;
-                }
-            }
+  let err = false;
+  let errMsg = '';
+  for (const key in rules) {
+    const validList = rules[key];
+    if (validList && validList.length > 0) {
+      for (const validItem of validList) {
+        if (!validItem.fn(params[key])) {
+          err = true;
+          errMsg = validItem.message;
         }
+      }
     }
-    return [err, errMsg];
+  }
+  return [err, errMsg];
 };
 
 module.exports = {
-    getRequiredRules,
-    validateRules
-}
-
+  getRequiredRules,
+  validateRules
+};
 
 // serviceUtil.js
 const { formatDate } = require('./dayjs');
@@ -246,16 +239,16 @@ const { getRequiredRules, validateRules } = require('./validator');
  * @returns {Promise<{msg: string, errCode: number, msgZh: string}>}
  */
 const createTable = async (ctx, model) => {
-    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-    const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-    const sql = model.create().toSql();
-    try {
-        res.data = await ctx.db.mysql.query(sql.sql, sql.bindings);
-        return res;
-    } catch (e) {
-        err.data = e.message;
-        return err;
-    }
+  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+  const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+  const sql = model.create().toSql();
+  try {
+    res.data = await ctx.db.mysql.query(sql.sql, sql.bindings);
+    return res;
+  } catch (e) {
+    err.data = e.message;
+    return err;
+  }
 };
 
 /**
@@ -266,14 +259,14 @@ const createTable = async (ctx, model) => {
  * @returns {Promise<*>}
  */
 const count = async (ctx, model, cond = {}) => {
-    const { mysql } = ctx.$root.DB;
-    const sql = model.count().toSql();
-    const res = await ctx.db.mysql.query(sql.sql, sql.bindings);
-    if (res && res.length > 0) {
-        return res[0].total;
-    } else {
-        return null;
-    }
+  const { mysql } = ctx.$root.DB;
+  const sql = model.count().toSql();
+  const res = await ctx.db.mysql.query(sql.sql, sql.bindings);
+  if (res && res.length > 0) {
+    return res[0].total;
+  } else {
+    return null;
+  }
 };
 
 /**
@@ -284,16 +277,16 @@ const count = async (ctx, model, cond = {}) => {
  * @returns {Promise<*>}
  */
 const page = async (ctx, model, cond = {}) => {
-    const countResult = await count(ctx, model, cond);
-    let totalPage = 1;
-    let totalSize = countResult;
-    if (cond.pageSize && cond.pageSize > 0) {
-        totalPage = Math.ceil(totalSize / cond.pageSize);
-    }
-    return {
-        totalPage,
-        totalSize
-    };
+  const countResult = await count(ctx, model, cond);
+  let totalPage = 1;
+  let totalSize = countResult;
+  if (cond.pageSize && cond.pageSize > 0) {
+    totalPage = Math.ceil(totalSize / cond.pageSize);
+  }
+  return {
+    totalPage,
+    totalSize
+  };
 };
 
 /**
@@ -304,21 +297,21 @@ const page = async (ctx, model, cond = {}) => {
  * @returns {Promise<*>}
  */
 const list = async (ctx, model, cond = {}) => {
-    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-    const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-    try {
-        const pageResult = await page(ctx, model, cond);
-        const sql = model.select(['*']).where(cond).toSql();
-        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-        const userFilter = model._filter || {};
-        pageResult.list = filterDbResult(dbResult, userFilter);
-        res.data = pageResult;
-        return res;
-    } catch (e) {
-        console.log(e);
-        err.data = e.message;
-        return err;
-    }
+  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+  const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+  try {
+    const pageResult = await page(ctx, model, cond);
+    const sql = model.select(['*']).where(cond).toSql();
+    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
+    const userFilter = model._filter || {};
+    pageResult.list = filterDbResult(dbResult, userFilter);
+    res.data = pageResult;
+    return res;
+  } catch (e) {
+    console.log(e);
+    err.data = e.message;
+    return err;
+  }
 };
 
 /**
@@ -329,23 +322,23 @@ const list = async (ctx, model, cond = {}) => {
  * @returns {Promise<null|*>}
  */
 const listOne = async (ctx, model, cond = {}) => {
-    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-    const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-    try {
-        const sql = model.select(['*']).where(cond).toSql();
-        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-        const userFilter = model._filter || {};
-        const filterResult = filterDbResult(dbResult, userFilter);
-        if (filterResult && filterResult.length > 0) {
-            res.data = filterResult[0];
-        } else {
-            res.data = null;
-        }
-        return res;
-    } catch (e) {
-        err.data = e.message;
-        return err;
+  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+  const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+  try {
+    const sql = model.select(['*']).where(cond).toSql();
+    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
+    const userFilter = model._filter || {};
+    const filterResult = filterDbResult(dbResult, userFilter);
+    if (filterResult && filterResult.length > 0) {
+      res.data = filterResult[0];
+    } else {
+      res.data = null;
     }
+    return res;
+  } catch (e) {
+    err.data = e.message;
+    return err;
+  }
 };
 
 /**
@@ -356,17 +349,17 @@ const listOne = async (ctx, model, cond = {}) => {
  * @returns {Promise<void>}
  */
 const save = async (ctx, model, params = {}) => {
-    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-    const paramErr = Object.assign({}, ctx.result.STATUS_CODE.PARAM_ERROR);
-    const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-    const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-    const rules = getRequiredRules(model);
-    const [err, errMsg] = validateRules(params, rules);
-    if (!err) {
-        const sql = model.create(params).toSql();
-        try {
-            const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-            /*
+  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+  const paramErr = Object.assign({}, ctx.result.STATUS_CODE.PARAM_ERROR);
+  const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+  const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
+  const rules = getRequiredRules(model);
+  const [err, errMsg] = validateRules(params, rules);
+  if (!err) {
+    const sql = model.create(params).toSql();
+    try {
+      const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
+      /*
               OkPacket {
                 fieldCount: 0,
                 affectedRows: 1,
@@ -378,20 +371,20 @@ const save = async (ctx, model, params = {}) => {
                 changedRows: 0
               }
              */
-            if (dbResult && dbResult.affectedRows > 0) {
-                res.data = 'success';
-                return res;
-            } else {
-                return unknownErr;
-            }
-        } catch (e) {
-            sqlErr.data = e.message;
-            return sqlErr;
-        }
-    } else {
-        paramErr.data = errMsg;
-        return paramErr;
+      if (dbResult && dbResult.affectedRows > 0) {
+        res.data = 'success';
+        return res;
+      } else {
+        return unknownErr;
+      }
+    } catch (e) {
+      sqlErr.data = e.message;
+      return sqlErr;
     }
+  } else {
+    paramErr.data = errMsg;
+    return paramErr;
+  }
 };
 
 /**
@@ -404,19 +397,19 @@ const save = async (ctx, model, params = {}) => {
  * @returns {Promise<void>}
  */
 const update = async (ctx, model, params = {}, isUpdateAt = true, pk = 'code') => {
-    if (isUpdateAt && !params['update_at']) {
-        params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
-    }
-    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-    const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-    const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-    const cond = { [pk]: params[pk] };
-    const modelObj = Object.assign({}, params);
-    delete modelObj[pk];
-    const sql = model.update(modelObj).where(cond).toSql();
-    try {
-        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-        /*
+  if (isUpdateAt && !params['update_at']) {
+    params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
+  }
+  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+  const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+  const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
+  const cond = { [pk]: params[pk] };
+  const modelObj = Object.assign({}, params);
+  delete modelObj[pk];
+  const sql = model.update(modelObj).where(cond).toSql();
+  try {
+    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
+    /*
             OkPacket {
               fieldCount: 0,
               affectedRows: 1,
@@ -428,16 +421,16 @@ const update = async (ctx, model, params = {}, isUpdateAt = true, pk = 'code') =
               changedRows: 1
             }
            */
-        if (dbResult) {
-            res.data = 'success';
-            return res;
-        } else {
-            return unknownErr;
-        }
-    } catch (e) {
-        sqlErr.data = e.message;
-        return sqlErr;
+    if (dbResult) {
+      res.data = 'success';
+      return res;
+    } else {
+      return unknownErr;
     }
+  } catch (e) {
+    sqlErr.data = e.message;
+    return sqlErr;
+  }
 };
 
 /**
@@ -450,20 +443,27 @@ const update = async (ctx, model, params = {}, isUpdateAt = true, pk = 'code') =
  * @param pk
  * @returns {Promise<void>}
  */
-const remove = async (ctx, model, params = {}, isUpdateAt = true, softKey = 'state', pk = 'code') => {
-    if (isUpdateAt && !params['update_at']) {
-        params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
-    }
-    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-    const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-    const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-    const cond = { [pk]: params[pk] };
-    const modelObj = { [softKey]: 3 };
-    delete model[pk];
-    const sql = model.update(modelObj).where(cond).toSql();
-    try {
-        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-        /*
+const remove = async (
+  ctx,
+  model,
+  params = {},
+  isUpdateAt = true,
+  softKey = 'state',
+  pk = 'code'
+) => {
+  if (isUpdateAt && !params['update_at']) {
+    params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
+  }
+  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+  const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+  const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
+  const cond = { [pk]: params[pk] };
+  const modelObj = { [softKey]: 3 };
+  delete model[pk];
+  const sql = model.update(modelObj).where(cond).toSql();
+  try {
+    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
+    /*
           OkPacket {
             fieldCount: 0,
             affectedRows: 1,
@@ -475,28 +475,27 @@ const remove = async (ctx, model, params = {}, isUpdateAt = true, softKey = 'sta
             changedRows: 1
           }
          */
-        if (dbResult) {
-            res.data = 'success';
-            return res;
-        } else {
-            return unknownErr;
-        }
-    } catch (e) {
-        sqlErr.data = e.message;
-        return sqlErr;
+    if (dbResult) {
+      res.data = 'success';
+      return res;
+    } else {
+      return unknownErr;
     }
+  } catch (e) {
+    sqlErr.data = e.message;
+    return sqlErr;
+  }
 };
 
 module.exports = {
-    createTable,
-    count,
-    list,
-    listOne,
-    save,
-    update,
-    remove
+  createTable,
+  count,
+  list,
+  listOne,
+  save,
+  update,
+  remove
 };
-
 
 // server/user/list.js 中使用
 const serviceUtil = require('../../utils/serviceUtil');
@@ -508,13 +507,12 @@ const UserModel = require('../../model/UserModel');
  * @returns {Promise<void>}
  */
 module.exports = async (ctx) => {
-    if (ctx.method === 'POST') {
-        ctx.body = await serviceUtil.list(ctx, UserModel, ctx.request.body);
-    } else if (ctx.method === 'GET') {
-        ctx.body = Result.fail(null, 'unsupported', ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-    }
+  if (ctx.method === 'POST') {
+    ctx.body = await serviceUtil.list(ctx, UserModel, ctx.request.body);
+  } else if (ctx.method === 'GET') {
+    ctx.body = Result.fail(null, 'unsupported', ctx.result.STATUS_CODE.UNKNOWN_ERROR);
+  }
 };
-
 ```
 
 ## Model定义参考
@@ -632,20 +630,23 @@ module.exports = UserModel;
 ```
 
 ## fix记录
-+ 0.0.3
-  + 移除ErrorHandler
-  + 2024/01/14 data数据多余的‘’拼接问题
-  + 2024/01/15 补充OrderBy与GroupBy初步支持
-  + 2024/01/21 全部参数化,可以按需使用配置文件覆盖原始的部分配置
-+ 0.0.5
-  + 2024/04/04 Log配置提升
-  + 2024/04/04 常用工具，直接挂载到ctx
-+ 0.0.6
-  + 2024/04/21 修改入口与插件使用方式
-+ 0.0.7
-  + 2024/05/11 动态路由无next,默认作为终结点，进一步简化配置使用
-  + 2024/05/11 开发load来提供更灵活的顺序加载方式，开放use提供自定义插件加载入口
-  + 2024/05/11 优化库的输出文件及其目录文件结构，提供更好的类型提示支持
-  + 2024/05/13 针对性的路由插件处理,提供默认加载的插件方式，和后期开放性的内置可选插件加载方式
-  + 2024/05/15 动态路由匹配规则优化与精简，补充playground，说明如何使用库文件
-  + 2024/05/18 精简配置，与sqlModel的定义
+
+- 0.0.3
+  - 移除ErrorHandler
+  - 2024/01/14 data数据多余的‘’拼接问题
+  - 2024/01/15 补充OrderBy与GroupBy初步支持
+  - 2024/01/21 全部参数化,可以按需使用配置文件覆盖原始的部分配置
+- 0.0.5
+  - 2024/04/04 Log配置提升
+  - 2024/04/04 常用工具，直接挂载到ctx
+- 0.0.6
+  - 2024/04/21 修改入口与插件使用方式
+- 0.0.7
+  - 2024/05/11 动态路由无next,默认作为终结点，进一步简化配置使用
+  - 2024/05/11 开发load来提供更灵活的顺序加载方式，开放use提供自定义插件加载入口
+  - 2024/05/11 优化库的输出文件及其目录文件结构，提供更好的类型提示支持
+  - 2024/05/13 针对性的路由插件处理,提供默认加载的插件方式，和后期开放性的内置可选插件加载方式
+  - 2024/05/15 动态路由匹配规则优化与精简，补充playground，说明如何使用库文件
+  - 2024/05/18 精简配置，与sqlModel的定义
+- 0.0.8
+  - 2024/05/19 修改默认api文件夹路径，简化result设置与使用

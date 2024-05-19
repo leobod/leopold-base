@@ -27,13 +27,6 @@ module.exports = {
       //   }
       // }
     },
-    Result: {
-      // UNKNOWN_ERROR: {
-      //   errCode: -1,
-      //   msg: 'UNKNOWN_ERROR',
-      //   msgZh: '未知异常'
-      // }
-    },
     Cors: {
       match: '/',
       opts: {

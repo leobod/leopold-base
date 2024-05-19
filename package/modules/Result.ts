@@ -1,4 +1,10 @@
-import { ResultFactory } from '../tools/ResultFactory';
+const uniResponse = function (data: any, msg: string = 'success', code: number = 0) {
+  return {
+    code,
+    msg,
+    data
+  };
+};
 
 export const Result = {
   /**
@@ -8,9 +14,9 @@ export const Result = {
    * @param config
    */
   onLoad: function (root, app, config = {}) {
-    root.result = ResultFactory.onCreate(config);
+    root.result = uniResponse;
     app.use(async (ctx, next) => {
-      ctx.result = root.result;
+      ctx.result = uniResponse;
       await next();
     });
   }
