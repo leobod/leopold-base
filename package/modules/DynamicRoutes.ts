@@ -6,6 +6,10 @@ interface DynamicRoutesConfig {
   opts: Array<{ match: string; dir: string }>;
 }
 
+interface DynamicRoutesFn {
+  (ctx: any): void;
+}
+
 const getRenderFilePath = async (
   root,
   app,
@@ -57,18 +61,17 @@ const getRenderFilePath = async (
 const renderMatch = async (ctx, next) => {
   const parsedUrl = new URL(ctx.href);
   const leopold = ctx.leopold;
+  let fn: null | DynamicRoutesFn = null;
   for (const group of leopold.routes) {
     if (group.match(parsedUrl.pathname)) {
-      const fn = group.children[parsedUrl.pathname];
-      if (fn) {
-        ctx.status = 200;
-        await fn(ctx);
-        break;
-      } else {
-        ctx.status = 404;
-        break;
-      }
+      fn = group.children[parsedUrl.pathname];
+      break;
     }
+  }
+  if (fn) {
+    await fn(ctx);
+  } else {
+    await next();
   }
 };
 
