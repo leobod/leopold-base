@@ -3,6 +3,10 @@ import Koa from 'koa';
 import p from 'path';
 import * as modules from '../modules';
 import templateConfig from '../config';
+import { UniResponseType } from '../modules/Result';
+import { DbManager } from '../tools/DbFactory';
+import { ScheduleManager } from '../tools/ScheduleFactory';
+import { WebSocketServer } from 'ws';
 
 interface LeopoldConfig {
   path?: string;
@@ -19,7 +23,10 @@ class Leopold {
   public config: any;
   public app: Koa;
   public server: Server<typeof IncomingMessage, typeof ServerResponse>;
-  public result: any;
+  public db?: DbManager;
+  public result?: UniResponseType;
+  public schedule?: ScheduleManager;
+  public wss?: WebSocketServer;
 
   constructor(config: LeopoldConfig = { path: '.' }) {
     // 初始化参数

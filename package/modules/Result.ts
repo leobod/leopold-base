@@ -1,4 +1,18 @@
-const uniResponse = function (data: any, msg: string = 'success', code: number = 0) {
+export interface UniResponseResultType {
+  code: number;
+  msg: string;
+  data: any;
+}
+
+export interface UniResponseType {
+  (data: any, msg?: string, code?: number): UniResponseResultType;
+}
+
+const uniResponse: UniResponseType = function (
+  data: any,
+  msg: string = 'success',
+  code: number = 0
+) {
   return {
     code,
     msg,

@@ -2,7 +2,11 @@ import { isEmpty } from '../utils/obj';
 import { MysqlRDB } from './MysqlRDB';
 import { RedisRDB } from './RedisRDB';
 
-class DbManager {
+export interface DbManagerDef {
+  [key: string]: MysqlRDB | RedisRDB | any;
+}
+
+export class DbManager implements DbManagerDef {
   constructor() {}
 
   setDb(key, value) {

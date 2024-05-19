@@ -50,7 +50,7 @@ for (let i in schedule.scheduledJobs) {
 schedule.gracefulShutdown();
  */
 
-class ScheduleManager {
+export class ScheduleManager {
   public list: any = {};
 
   constructor() {}
