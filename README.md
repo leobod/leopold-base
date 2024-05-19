@@ -28,7 +28,7 @@
 ## 配置文件范例
 
 ```javascript
-// app.config.js
+// config.js
 const p = require('path');
 
 module.exports = {
@@ -122,17 +122,16 @@ module.exports = {
 
 // main.js
 // 默认 localhost:8360
-const { Application } = require('@esidecn/leopold-base');
-const config = require('./app.config');
-const p = require('path');
-const router = require('./router');
-const app = new Application(config);
+const { Leopold } = require('@eside/leopold');
+
+const leopold = new Leopold();
+leopold.load();
 // 其他中间件函数
-app.server.use(async (ctx, next) => {
+leopold.registerServerModule(async (ctx, next) => {
   await next();
 });
-app.server.use(router.routes(), router.allowedMethods());
-app.start();
+leopold.server.use(router.routes(), router.allowedMethods());
+leopold.start();
 ```
 
 
@@ -247,13 +246,11 @@ const { getRequiredRules, validateRules } = require('./validator');
  * @returns {Promise<{msg: string, errCode: number, msgZh: string}>}
  */
 const createTable = async (ctx, model) => {
-    const { mysql } = ctx.$root.DB;
-    const { Result } = ctx.$root;
-    const res = Object.assign({}, Result.STATUS_CODE.SUCCESS);
-    const err = Object.assign({}, Result.STATUS_CODE.SQL_ERROR);
-    const sql = model.getCreateTableSql();
+    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+    const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+    const sql = model.create().toSql();
     try {
-        res.data = await mysql.pureQuery(sql);
+        res.data = await ctx.db.mysql.query(sql.sql, sql.bindings);
         return res;
     } catch (e) {
         err.data = e.message;
@@ -270,8 +267,8 @@ const createTable = async (ctx, model) => {
  */
 const count = async (ctx, model, cond = {}) => {
     const { mysql } = ctx.$root.DB;
-    const [sql] = model.select(['*']).addCond(cond).count().sql();
-    const res = await mysql.pureQuery(sql);
+    const sql = model.count().toSql();
+    const res = await ctx.db.mysql.query(sql.sql, sql.bindings);
     if (res && res.length > 0) {
         return res[0].total;
     } else {
@@ -307,14 +304,12 @@ const page = async (ctx, model, cond = {}) => {
  * @returns {Promise<*>}
  */
 const list = async (ctx, model, cond = {}) => {
-    const { mysql } = ctx.$root.DB;
-    const { Result } = ctx.$root;
-    const res = Object.assign({}, Result.STATUS_CODE.SUCCESS);
-    const err = Object.assign({}, Result.STATUS_CODE.SQL_ERROR);
+    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+    const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
     try {
         const pageResult = await page(ctx, model, cond);
-        const [sql] = model.select(['*']).addCond(cond).sql();
-        const dbResult = await mysql.pureQuery(sql);
+        const sql = model.select(['*']).where(cond).toSql();
+        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
         const userFilter = model._filter || {};
         pageResult.list = filterDbResult(dbResult, userFilter);
         res.data = pageResult;
@@ -334,13 +329,11 @@ const list = async (ctx, model, cond = {}) => {
  * @returns {Promise<null|*>}
  */
 const listOne = async (ctx, model, cond = {}) => {
-    const { mysql } = ctx.$root.DB;
-    const { Result } = ctx.$root;
-    const res = Object.assign({}, Result.STATUS_CODE.SUCCESS);
-    const err = Object.assign({}, Result.STATUS_CODE.SQL_ERROR);
+    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+    const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
     try {
-        const [sql] = model.select(['*']).addCond(cond).sql();
-        const dbResult = await mysql.pureQuery(sql);
+        const sql = model.select(['*']).where(cond).toSql();
+        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
         const userFilter = model._filter || {};
         const filterResult = filterDbResult(dbResult, userFilter);
         if (filterResult && filterResult.length > 0) {
@@ -363,18 +356,16 @@ const listOne = async (ctx, model, cond = {}) => {
  * @returns {Promise<void>}
  */
 const save = async (ctx, model, params = {}) => {
-    const { mysql } = ctx.$root.DB;
-    const { Result } = ctx.$root;
-    const res = Object.assign({}, Result.STATUS_CODE.SUCCESS);
-    const paramErr = Object.assign({}, Result.STATUS_CODE.PARAM_ERROR);
-    const sqlErr = Object.assign({}, Result.STATUS_CODE.SQL_ERROR);
-    const unknownErr = Object.assign({}, Result.STATUS_CODE.UNKNOWN_ERROR);
+    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+    const paramErr = Object.assign({}, ctx.result.STATUS_CODE.PARAM_ERROR);
+    const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+    const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
     const rules = getRequiredRules(model);
     const [err, errMsg] = validateRules(params, rules);
     if (!err) {
-        const [sql] = model.create(params).sql();
+        const sql = model.create(params).toSql();
         try {
-            const dbResult = await mysql.pureQuery(sql);
+            const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
             /*
               OkPacket {
                 fieldCount: 0,
@@ -416,17 +407,15 @@ const update = async (ctx, model, params = {}, isUpdateAt = true, pk = 'code') =
     if (isUpdateAt && !params['update_at']) {
         params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
     }
-    const { mysql } = ctx.$root.DB;
-    const { Result } = ctx.$root;
-    const res = Object.assign({}, Result.STATUS_CODE.SUCCESS);
-    const sqlErr = Object.assign({}, Result.STATUS_CODE.SQL_ERROR);
-    const unknownErr = Object.assign({}, Result.STATUS_CODE.UNKNOWN_ERROR);
+    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+    const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+    const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
     const cond = { [pk]: params[pk] };
     const modelObj = Object.assign({}, params);
     delete modelObj[pk];
-    const [sql] = model.update(modelObj).addCond(cond).sql();
+    const sql = model.update(modelObj).where(cond).toSql();
     try {
-        const dbResult = await mysql.pureQuery(sql);
+        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
         /*
             OkPacket {
               fieldCount: 0,
@@ -465,17 +454,15 @@ const remove = async (ctx, model, params = {}, isUpdateAt = true, softKey = 'sta
     if (isUpdateAt && !params['update_at']) {
         params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
     }
-    const { mysql } = ctx.$root.DB;
-    const { Result } = ctx.$root;
-    const res = Object.assign({}, Result.STATUS_CODE.SUCCESS);
-    const sqlErr = Object.assign({}, Result.STATUS_CODE.SQL_ERROR);
-    const unknownErr = Object.assign({}, Result.STATUS_CODE.UNKNOWN_ERROR);
+    const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
+    const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
+    const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
     const cond = { [pk]: params[pk] };
     const modelObj = { [softKey]: 3 };
     delete model[pk];
-    const [sql] = model.update(modelObj).addCond(cond).sql();
+    const sql = model.update(modelObj).where(cond).toSql();
     try {
-        const dbResult = await mysql.pureQuery(sql);
+        const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
         /*
           OkPacket {
             fieldCount: 0,
@@ -521,11 +508,10 @@ const UserModel = require('../../model/UserModel');
  * @returns {Promise<void>}
  */
 module.exports = async (ctx) => {
-    const { Result } = ctx.$root;
     if (ctx.method === 'POST') {
         ctx.body = await serviceUtil.list(ctx, UserModel, ctx.request.body);
     } else if (ctx.method === 'GET') {
-        ctx.body = Result.fail(null, 'unsupported', Result.STATUS_CODE.UNKNOWN_ERROR);
+        ctx.body = Result.fail(null, 'unsupported', ctx.result.STATUS_CODE.UNKNOWN_ERROR);
     }
 };
 
@@ -607,26 +593,9 @@ const UserModel = new SQLModel({
       defaultExpr: 'CURRENT_TIMESTAMP'
     }
   },
-  ref: [
-    // {
-    //   table: 'tb_group',
-    //   where: 'tb_group.code = tb_user.fk_group',
-    //   column: {
-    //     name: {
-    //       alias: 'fkGroupName'
-    //     }
-    //   }
-    // },
-    {
-      table: 'tb_department',
-      where: 'tb_department.code = tb_user.fk_department',
-      column: {
-        name: {
-          alias: 'fkDepartmentName'
-        }
-      }
-    }
-  ],
+  ref: {
+    tb_department: 'tb_department.code = tb_user.fk_department'
+  },
   filter: {
     passwd: (val, row = {}) => {
       return '**********';
@@ -679,3 +648,4 @@ module.exports = UserModel;
   + 2024/05/11 优化库的输出文件及其目录文件结构，提供更好的类型提示支持
   + 2024/05/13 针对性的路由插件处理,提供默认加载的插件方式，和后期开放性的内置可选插件加载方式
   + 2024/05/15 动态路由匹配规则优化与精简，补充playground，说明如何使用库文件
+  + 2024/05/18 精简配置，与sqlModel的定义

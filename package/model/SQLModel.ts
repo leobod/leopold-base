@@ -355,6 +355,7 @@ class SQLModel {
     this._sqlObject.type = 'SELECT';
     this._sqlObject.query.push('SELECT');
     this._sqlObject.columns.push('COUNT(*) AS total');
+    this._sqlObject.table.push(this._table);
     this._sqlObject.end = ';';
     return this;
   }
