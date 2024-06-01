@@ -17,10 +17,11 @@ export { TemplateHandler } from './modules/TemplateHandler';
 export { Websocket } from './modules/Websocket';
 
 export { DbFactory } from './tools/DbFactory';
-export { ScheduleFactory } from './tools/ScheduleFactory';
-export { WebsocketFactory } from './tools/WebsocketFactory';
+export { MailSender, MailFactory } from './tools/MailFactory'
 export { MysqlRDB } from './tools/MysqlRDB';
 export { RedisRDB } from './tools/RedisRDB';
+export { ScheduleFactory } from './tools/ScheduleFactory';
+export { WebsocketFactory } from './tools/WebsocketFactory';
 
 export { routePrefixMather } from './utils/routeMatch';
 export { formatSql } from './utils/formater';

@@ -1,10 +1,13 @@
+import { isEmpty } from '../utils/obj';
 import nodemailer from 'nodemailer';
 
-class Mailer {
+class MailSender {
   private config: any;
   private mailer: any;
+  private name: String | null = null;
 
-  constructor(config = {}) {
+  constructor(config = {}, name = null) {
+    this.name = name;
     const emailConfigTemplate = {
       host: '',
       port: '',
@@ -17,6 +20,10 @@ class Mailer {
     this.config = Object.assign({}, emailConfigTemplate, config);
     this.config.secure = Number(this.config.port) === 465;
     this.mailer = nodemailer.createTransport(this.config);
+  }
+
+  set(key, val) {
+    this[key] = val;
   }
 
   /**
@@ -33,7 +40,9 @@ class Mailer {
    */
   async send(tolist, subject, cclist, text, html, attachments) {
     const mailOptions = {
-      from: this.config.auth.user /* 发件邮箱 */,
+      from: this.name
+        ? `${this.name} ${this.config.auth.user}`
+        : this.config.auth.user /* 发件邮箱 */,
       to: tolist /* 接收方 */,
       subject: subject // 主题
     };
@@ -60,4 +69,36 @@ class Mailer {
   }
 }
 
-export { Mailer };
+export interface MailManagerDef {
+  [key: string]: MailSender | any;
+}
+
+export class MailManager implements MailManagerDef {
+  constructor() {}
+
+  setMail(key, value) {
+    this[key] = value;
+  }
+  getMail(key, value) {
+    return this[key];
+  }
+}
+
+class MailFactory {
+  public static instance: MailManager | null = null;
+  public static onCreate(config = {}) {
+    const mailManager = new MailManager();
+    if (!isEmpty(config)) {
+      for (const key in config) {
+        const item = config[key];
+        if (item.type === 'NODEMAILER' && !isEmpty(item.config)) {
+          mailManager.setMail(key, new MailSender(item.config, item.name));
+        }
+      }
+    }
+    MailFactory.instance = mailManager;
+    return mailManager;
+  }
+}
+
+export { MailSender, MailFactory };

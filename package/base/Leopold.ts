@@ -7,6 +7,7 @@ import { UniResponseType } from '../modules/Result';
 import { DbManager } from '../tools/DbFactory';
 import { ScheduleManager } from '../tools/ScheduleFactory';
 import { WebSocketServer } from 'ws';
+import {MailManager} from "../tools/MailFactory";
 
 interface LeopoldConfig {
   path?: string;
@@ -24,6 +25,7 @@ class Leopold {
   public app: Koa;
   public server: Server<typeof IncomingMessage, typeof ServerResponse>;
   public db?: DbManager;
+  public mail?: MailManager;
   public result?: UniResponseType;
   public schedule?: ScheduleManager;
   public wss?: WebSocketServer;
@@ -53,6 +55,7 @@ class Leopold {
   load(arrs: Array<string> | string = 'default', config = {}) {
     const defaultMiddlewares = [
       'AppLog',
+      'Mail',
       'Db',
       'Result',
       'Schedule',

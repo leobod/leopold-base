@@ -4,6 +4,21 @@ module.exports = {
   path: '.',
   port: 8360,
   modules: {
+    Mail: {
+      // msg: {
+      //   type: 'NODEMAILER',
+      //   name: '',
+      //   config: {
+      //     host: 'smtp.qiye.aliyun.com',
+      //     port: 465,
+      //     auth: {
+      //       user: '',
+      //       pass: ''
+      //     },
+      //     secure: true
+      //   }
+      // }
+    },
     Db: {
       // mysql: {
       //   type: 'MYSQL',
