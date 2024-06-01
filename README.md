@@ -35,6 +35,21 @@ module.exports = {
   path: '.',
   port: 8360,
   modules: {
+    Mail: {
+      // msg: {
+      //   type: 'NODEMAILER',
+      //   name: '',
+      //   config: {
+      //     host: 'smtp.qiye.aliyun.com',
+      //     port: 465,
+      //     auth: {
+      //       user: '',
+      //       pass: ''
+      //     },
+      //     secure: true
+      //   }
+      // }
+    },
     Db: {
       // mysql: {
       //   type: 'MYSQL',
@@ -652,3 +667,4 @@ module.exports = UserModel;
   - 2024/05/19 修改默认api文件夹路径，简化result设置与使用
 - 0.0.10
   - 2024/05/19 修复动态路由未匹配到时的后续动作，避免后续加载的自定义模块无法加载问题
+  - 2024/06/01 补充内置邮件发送工具
