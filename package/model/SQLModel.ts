@@ -150,7 +150,7 @@ class SQLModel {
         });
       }
     }
-    this._sqlObject.table = tableKeyList
+    this._sqlObject.table = tableKeyList;
     return this;
   }
 
@@ -158,7 +158,7 @@ class SQLModel {
     if (sql) {
       this._sqlObject.columns.push(sql);
     }
-    return this
+    return this;
   }
 
   selectOne(fields: Array<string> | string = '*') {
@@ -205,10 +205,7 @@ class SQLModel {
         let columnOperate = columnItem.operate || '=';
         if (columnOperate instanceof Function) {
           const bindings = [];
-          this.andRawWhere(
-              columnOperate(columnInfo.key, obj[key], bindings),
-              bindings
-          );
+          this.andRawWhere(columnOperate(columnInfo.key, obj[key], bindings), bindings);
         } else {
           this.andWhere(columnInfo.key, obj[key], columnOperate);
         }
@@ -293,6 +290,7 @@ class SQLModel {
 
   orderBy(key, sort = 'ASC') {
     this._sqlObject.orders.push(`${key} ${sort}`);
+    return this;
   }
 
   insert(obj = {}) {

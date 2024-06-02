@@ -340,7 +340,7 @@ const listOne = async (ctx, model, cond = {}) => {
   const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
   const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
   try {
-    const sql = model.select(['*']).where(cond).toSql();
+    const sql = model.select(['*']).where(cond).orderBy('create_at', 'DESC').toSql();
     const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
     const userFilter = model._filter || {};
     const filterResult = filterDbResult(dbResult, userFilter);
@@ -371,7 +371,7 @@ const save = async (ctx, model, params = {}) => {
   const rules = getRequiredRules(model);
   const [err, errMsg] = validateRules(params, rules);
   if (!err) {
-    const sql = model.create(params).toSql();
+    const sql = model.insert(params).toSql();
     try {
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       /*
@@ -668,3 +668,5 @@ module.exports = UserModel;
 - 0.0.10
   - 2024/05/19 修复动态路由未匹配到时的后续动作，避免后续加载的自定义模块无法加载问题
   - 2024/06/01 补充内置邮件发送工具
+- 0.0.11
+  - 2024/06/02 修复orderBy无法链式调用问题
