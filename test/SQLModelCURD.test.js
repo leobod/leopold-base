@@ -108,7 +108,8 @@ const UserModel = new SQLModel({
 
 describe('[SQLModel].insert', () => {
   test(`UserModel.insert(userObj).toSql()`, () => {
-    let sql = `INSERT INTO tb_user (code, fk_group, account, paswd, sex, update_at) VALUES (?, ?, ?, ?, ?, ?);`;
+    let sql =
+      'INSERT INTO `tb_user` (`code`, `fk_group`, `account`, `paswd`, `sex`, `update_at`) VALUES (?, ?, ?, ?, ?, ?);';
     const userObj = {
       code: '123456',
       fk_group: 'leopold',
@@ -126,7 +127,8 @@ describe('[SQLModel].insert', () => {
 
 describe('[SQLModel].update', () => {
   test(`UserModel.update(userObj).where({ code: '1234' }).toSql()`, () => {
-    let sql = `UPDATE tb_user SET code = ?, fk_group = ?, account = ?, paswd = ?, sex = ?, update_at = ? WHERE tb_user.code = ?;`;
+    let sql =
+      'UPDATE `tb_user` SET `code` = ?, `fk_group` = ?, `account` = ?, `paswd` = ?, `sex` = ?, `update_at` = ? WHERE tb_user.code = ?;';
     const userObj = {
       code: '123456',
       fk_group: 'leopold',
@@ -144,7 +146,7 @@ describe('[SQLModel].update', () => {
 
 describe('[SQLModel].delete', () => {
   test(`UserModel.remove().where({ code: '1234' }).toSql()`, () => {
-    let sql = `DELETE FROM tb_user WHERE tb_user.code = ?;`
+    let sql = 'DELETE FROM `tb_user` WHERE tb_user.code = ?;';
     const current = UserModel.remove().where({ code: '123456' }).toSql();
     // const finalSql = formatSql(current.sql, current.bindings)
     // console.log(finalSql);

@@ -143,27 +143,27 @@ const UserModel = new SQLModel({
 describe('[SQLModel].create_drop', () => {
   test('User.create().toSql()', () => {
     let sql =
-      'CREATE TABLE IF NOT EXISTS user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, group VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
+      'CREATE TABLE IF NOT EXISTS `user` (`id` INTEGER NOT NULL AUTO_INCREMENT UNIQUE, `dep_id` INTEGER NOT NULL, `name` VARCHAR(50) NOT NULL, `group` VARCHAR(50) NOT NULL, PRIMARY KEY (`id`,`dep_id`));';
     expect(User.create().toSql().sql).toBe(sql);
   });
   test('User.create(true).toSql()', () => {
     let sql =
-      'CREATE TABLE user (id INTEGER NOT NULL AUTO_INCREMENT UNIQUE, dep_id INTEGER NOT NULL, name VARCHAR(50) NOT NULL, group VARCHAR(50) NOT NULL, PRIMARY KEY (id,dep_id));';
+      'CREATE TABLE `user` (`id` INTEGER NOT NULL AUTO_INCREMENT UNIQUE, `dep_id` INTEGER NOT NULL, `name` VARCHAR(50) NOT NULL, `group` VARCHAR(50) NOT NULL, PRIMARY KEY (`id`,`dep_id`));';
     expect(User.create(true).toSql().sql).toBe(sql);
   });
   test('User.drop().toSql()', () => {
-    let sql = 'DROP TABLE IF EXISTS user;';
+    let sql = 'DROP TABLE IF EXISTS `user`;';
     expect(User.drop().toSql().sql).toBe(sql);
   });
   test(`User.drop(true).toSql()`, () => {
-    let sql = 'DROP TABLE user;';
+    let sql = 'DROP TABLE `user`;';
     expect(User.drop(true).toSql().sql).toBe(sql);
   });
 });
 
 describe('[SQLModel].select', () => {
   test(`User.select('id')_id`, () => {
-    let sql = `SELECT user.id AS id FROM user WHERE user.id = ?;`;
+    let sql = 'SELECT user.id AS `id` FROM `user` WHERE user.id = ?;';
     const searchForm = {
       id: 1
     };
@@ -172,7 +172,7 @@ describe('[SQLModel].select', () => {
     expect(current.sql).toBe(sql);
   });
   test(`User.select('id')_name`, () => {
-    let sql = `SELECT user.id AS id FROM user WHERE user.id = ? AND user.name LIKE ?;`;
+    let sql = 'SELECT user.id AS `id` FROM `user` WHERE user.id = ? AND user.name LIKE ?;';
     const searchForm = {
       id: 1,
       name: 'test'
@@ -182,7 +182,7 @@ describe('[SQLModel].select', () => {
   });
 
   test(`User.select('id')_group`, () => {
-    let sql = `SELECT user.id AS id FROM user WHERE user.id = ? AND user.name LIKE ? AND (user.group > ? AND user.group < ?);`;
+    let sql = 'SELECT user.id AS `id` FROM `user` WHERE user.id = ? AND user.name LIKE ? AND (user.group > ? AND user.group < ?);';
     const searchForm = {
       id: 1,
       name: 'test',

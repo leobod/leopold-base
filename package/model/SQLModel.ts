@@ -52,7 +52,7 @@ class SQLModel {
     if (!force) {
       this._sqlObject.query.push('IF NOT EXISTS');
     }
-    this._sqlObject.query.push(this._table);
+    this._sqlObject.query.push(`\`${this._table}\``);
     this._sqlObject.end = `;`;
     // 定义columns
     const pkList: Array<any> = [];
@@ -60,7 +60,7 @@ class SQLModel {
       const columnSqlList: Array<any> = [];
       const item = this._column[key];
       if (!item.ref) {
-        columnSqlList.push(key);
+        columnSqlList.push(`\`${key}\``);
         columnSqlList.push(item.type.toDialect());
         if (item.allowNull !== undefined && !item.allowNull) {
           columnSqlList.push('NOT NULL');
@@ -86,7 +86,7 @@ class SQLModel {
         }
         this._sqlObject.columns.push(columnSqlList.join(' '));
         if (item.primaryKey) {
-          pkList.push(key);
+          pkList.push(`\`${key}\``);
         }
       }
     }
@@ -104,7 +104,7 @@ class SQLModel {
     if (!force) {
       this._sqlObject.query.push('IF EXISTS');
     }
-    this._sqlObject.query.push(this._table);
+    this._sqlObject.query.push(`\`${this._table}\``);
     this._sqlObject.end = ';';
     return this;
   }
@@ -123,21 +123,21 @@ class SQLModel {
       if (fields === '*') fieldKeyList = Object.keys(this._column);
       else fieldKeyList = [fields];
     }
-    const tableKeyList: Array<string> = [this._table];
+    const tableKeyList: Array<string> = [`\`${this._table}\``];
     for (const key of fieldKeyList) {
       const columnItem = this._column[key];
       if (columnItem) {
         const columnItemSql: Array<string> = [];
         if (columnItem.ref && columnItem.origin) {
-          if (tableKeyList.indexOf(columnItem.ref) === -1) {
-            tableKeyList.push(columnItem.ref);
+          if (tableKeyList.indexOf(`\`${columnItem.ref}\``) === -1) {
+            tableKeyList.push(`\`${columnItem.ref}\``);
           }
           columnItemSql.push(`${columnItem.ref}.${columnItem.origin}`);
         } else {
           columnItemSql.push(`${this._table}.${key}`);
         }
         columnItemSql.push(`AS`);
-        columnItemSql.push(`${key}`);
+        columnItemSql.push(`\`${key}\``);
         this._sqlObject.columns.push(columnItemSql.join(' '));
       }
     }
@@ -173,10 +173,10 @@ class SQLModel {
     if (columnItem) {
       if (columnItem.ref && columnItem.origin) {
         columnKey = `${columnItem.ref}.${columnItem.origin}`;
-        columnTable = columnItem.ref;
+        columnTable = `${columnItem.ref}`;
       } else {
         columnKey = `${this._table}.${key}`;
-        columnTable = this._table;
+        columnTable = `${this._table}`;
       }
     }
     return {
@@ -191,8 +191,8 @@ class SQLModel {
       const columnInfo = this.getColumnInfo(key);
       if (columnInfo.table) {
         // 处理关联where
-        if (this._sqlObject.table.indexOf(columnInfo.table) === -1) {
-          this._sqlObject.table.push(columnInfo.table);
+        if (this._sqlObject.table.indexOf(`\`${columnInfo.table}\``) === -1) {
+          this._sqlObject.table.push(`\`${columnInfo.table}\``);
           const tableRefWhere = this._ref[columnInfo.table];
           if (tableRefWhere) {
             this._sqlObject.wheres.push({
@@ -298,14 +298,14 @@ class SQLModel {
     this._sqlObject.type = 'INSERT';
     this._sqlObject.query.push('INSERT');
     this._sqlObject.query.push('INTO');
-    this._sqlObject.query.push(this._table);
+    this._sqlObject.query.push(`\`${this._table}\``);
     this._sqlObject.end = ';';
 
     const columnSQl: Array<string> = [];
     const valueSQl: Array<string> = [];
     const bindingsSql: Array<string> = [];
     for (const key in obj) {
-      columnSQl.push(key);
+      columnSQl.push(`\`${key}\``);
       valueSQl.push('?');
       bindingsSql.push(obj[key]);
     }
@@ -319,13 +319,13 @@ class SQLModel {
     this.resetSqlObject();
     this._sqlObject.type = 'UPDATE';
     this._sqlObject.query.push('UPDATE');
-    this._sqlObject.query.push(this._table);
+    this._sqlObject.query.push(`\`${this._table}\``);
     this._sqlObject.end = ';';
 
     const columnSQl: Array<string> = [];
     const bindingsSql: Array<string> = [];
     for (const key in obj) {
-      columnSQl.push(`${key} = ?`);
+      columnSQl.push(`\`${key}\` = ?`);
       bindingsSql.push(obj[key]);
     }
     this._sqlObject.columns = columnSQl;
@@ -343,7 +343,7 @@ class SQLModel {
     this._sqlObject.type = 'DELETE';
     this._sqlObject.query.push('DELETE');
     this._sqlObject.query.push('FROM');
-    this._sqlObject.query.push(this._table);
+    this._sqlObject.query.push(`\`${this._table}\``);
     this._sqlObject.end = ';';
     return this;
   }
@@ -353,7 +353,7 @@ class SQLModel {
     this._sqlObject.type = 'SELECT';
     this._sqlObject.query.push('SELECT');
     this._sqlObject.columns.push('COUNT(*) AS total');
-    this._sqlObject.table.push(this._table);
+    this._sqlObject.table.push(`\`${this._table}\``);
     this._sqlObject.end = ';';
     return this;
   }
