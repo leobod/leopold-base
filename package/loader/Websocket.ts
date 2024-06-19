@@ -1,4 +1,4 @@
-import { WebsocketFactory } from '../tools/WebsocketFactory';
+import { WebsocketFactory } from '../plugin/WebsocketFactory';
 
 export const Websocket = {
   /**

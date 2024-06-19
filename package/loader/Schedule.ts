@@ -1,4 +1,4 @@
-import { ScheduleFactory } from '../tools/ScheduleFactory';
+import { ScheduleFactory } from '../plugin/ScheduleFactory';
 
 export const Schedule = {
   /**

@@ -33,19 +33,35 @@ const getRenderFilePath = async (
         .replace(/\\/g, '/')
         .replace(/.js/g, '');
       let matchedKey = '';
-      if (fileItemPath.endsWith('index')) {
-        const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
-        matchedKey = `${item.match === '/' ? '' : item.match}${indexFilePath}`;
-        const originFilePath = p.join(process.cwd(), item.dir, fileItem);
-        const fn = require(decodeURIComponent(originFilePath));
-        fileListPost[matchedKey] = fn;
-        matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`;
-        fileListPost[matchedKey] = fn;
-      } else {
-        matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`;
-        const originFilePath = p.join(process.cwd(), item.dir, fileItem);
-        const fn = require(decodeURIComponent(originFilePath));
-        fileListPost[matchedKey] = fn;
+      const originFilePath = p.join(process.cwd(), item.dir, fileItem);
+      const fn = require(decodeURIComponent(originFilePath));
+      if (typeof fn === 'function') {
+        if (fileItemPath.endsWith('index')) {
+          const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
+          matchedKey = `${item.match === '/' ? '' : item.match}${indexFilePath}`;
+          fileListPost[matchedKey] = fn;
+          matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`;
+          fileListPost[matchedKey] = fn;
+        } else {
+          matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}`;
+          fileListPost[matchedKey] = fn;
+        }
+      } else if (typeof fn === 'object') {
+        for (const fnKey in fn) {
+          const fnVal = fn[fnKey];
+          if (typeof fnVal === 'function') {
+            if (fnKey.endsWith('index')) {
+              const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
+              matchedKey = `${item.match === '/' ? '' : item.match}${indexFilePath}`;
+              fileListPost[matchedKey] = fnVal;
+              matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}/${fnKey}`;
+              fileListPost[matchedKey] = fnVal;
+            } else {
+              matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}/${fnKey}`;
+              fileListPost[matchedKey] = fnVal;
+            }
+          }
+        }
       }
     }
     routeFileList.push({

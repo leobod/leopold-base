@@ -1,4 +1,4 @@
-import { MailFactory } from '../tools/MailFactory';
+import { MailFactory } from '../plugin/MailFactory';
 
 export const Mail = {
     /**

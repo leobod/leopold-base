@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+import mysql from 'mysql';
 // return mysql.format(sql, params);
 
 const getSqlModel = function () {

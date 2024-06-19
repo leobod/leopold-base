@@ -67,9 +67,11 @@ module.exports = {
       // redis: {
       //   type: 'REDIS',
       //   config: {
-      //     host: '127.0.0.1',
-      //     port: '6379',
-      //     maxConnections: 5 // 最大连接数
+      //     password: '',
+      //     socket: {
+      //       host: '127.0.0.1',
+      //       port: '6379',
+      //     },
       //   }
       // }
     },
@@ -156,7 +158,7 @@ const formatDate = (d, format = 'YYYY/MM/DD HH:mm:ss') => {
   return dayjs(d).format(format);
 };
 
-// filter.js
+// filter.ts.js
 /**
  * 使用model过滤结果集
  * @param dbResult
@@ -243,7 +245,7 @@ module.exports = {
 
 // serviceUtil.js
 const { formatDate } = require('./dayjs');
-const { filterDbResult } = require('./filter');
+const { filterDbResult } = require('./filter.ts');
 const { getRequiredRules, validateRules } = require('./validator');
 // const { formatHumpLineTransfer } = require('../utils/formatter');
 
@@ -670,3 +672,5 @@ module.exports = UserModel;
   - 2024/06/01 补充内置邮件发送工具
 - 0.0.11
   - 2024/06/02 修复orderBy无法链式调用问题
+- 0.0.12
+  - 2024/06/19 补充Service,Controller,路由中单文件符合路由支持

@@ -1,4 +1,4 @@
-const { SQLObject } = require('./SQLObject');
+import { SQLObject } from './SQLObject';
 
 class SQLModel {
   _table: any;

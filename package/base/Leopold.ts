@@ -1,13 +1,15 @@
 import http, { Server, IncomingMessage, ServerResponse } from 'http';
 import Koa from 'koa';
 import p from 'path';
-import * as modules from '../modules';
+import * as modules from '../loader';
 import templateConfig from '../config';
-import { UniResponseType } from '../modules/Result';
-import { DbManager } from '../tools/DbFactory';
-import { ScheduleManager } from '../tools/ScheduleFactory';
+import { UniResponseType } from '../loader/Result';
+import { DbManager } from '../plugin/DbFactory';
+import { ScheduleManager } from '../plugin/ScheduleFactory';
 import { WebSocketServer } from 'ws';
-import {MailManager} from "../tools/MailFactory";
+import {MailManager} from "../plugin/MailFactory";
+import {MysqlRDB} from "../plugin/MysqlRDB";
+import {RedisRDB} from "../plugin/RedisRDB";
 
 interface LeopoldConfig {
   path?: string;
@@ -24,6 +26,8 @@ class Leopold {
   public config: any;
   public app: Koa;
   public server: Server<typeof IncomingMessage, typeof ServerResponse>;
+  public mysql?: MysqlRDB;
+  public redis?: RedisRDB;
   public db?: DbManager;
   public mail?: MailManager;
   public result?: UniResponseType;

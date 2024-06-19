@@ -1,4 +1,4 @@
-const os = require('os');
+import os from 'os';
 
 const isWin = () => {
   return os.type() === 'Windows_NT';
