@@ -51,8 +51,7 @@ const getRenderFilePath = async (
           const fnVal = fn[fnKey];
           if (typeof fnVal === 'function') {
             if (fnKey.endsWith('index')) {
-              const indexFilePath = fileItemPath.slice(0, fileItemPath.length - 5);
-              matchedKey = `${item.match === '/' ? '' : item.match}${indexFilePath}`;
+              matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}/`;
               fileListPost[matchedKey] = fnVal;
               matchedKey = `${item.match === '/' ? '' : item.match}${fileItemPath}/${fnKey}`;
               fileListPost[matchedKey] = fnVal;
