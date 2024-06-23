@@ -17,8 +17,8 @@ export class DefaultService extends Service {
     ctx: Context,
     params = {},
     opts = {
-      page_num_key: 'page_num',
-      page_szie_key: 'page_size'
+      page_num_key: 'pageNum',
+      page_szie_key: 'pageSize'
     }
   ) {
     try {
@@ -37,7 +37,7 @@ export class DefaultService extends Service {
     params = {},
     opts = {
       order_by_has: true,
-      order_by_key: 'create_at',
+      order_by_key: 'createAt',
       order_by_val: 'DESC'
     }
   ) {
@@ -69,7 +69,7 @@ export class DefaultService extends Service {
     params = {},
     opts = {
       update_time_modify: true,
-      update_time_key: 'update_at',
+      update_time_key: 'updateAt',
       pk: 'code'
     }
   ) {
@@ -89,7 +89,7 @@ export class DefaultService extends Service {
     params = {},
     opts = {
       update_time_modify: true,
-      update_time_key: 'update_at',
+      update_time_key: 'updateAt',
       soft_remove_key: 'state',
       soft_remove_val: 0,
       pk: 'code'

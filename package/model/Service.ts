@@ -90,6 +90,7 @@ export class Service {
       const sql = model
         .select(['*'])
         .where(reverseFormatObjCase(params, this.format))
+        .page(page_num, page_size)
         .toSql();
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       const userFilter = model._filter || {};
@@ -127,7 +128,7 @@ export class Service {
         sql = model
           .select(['*'])
           .where(reverseFormatObjCase(params, this.format))
-          .orderBy(order_by_key, order_by_val)
+          .orderBy(reverseFormatKeyCase(order_by_key, this.format), order_by_val)
           .toSql();
       } else {
         sql = model.select(['*']).where(params).toSql();
