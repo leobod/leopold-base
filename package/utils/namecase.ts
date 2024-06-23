@@ -2,42 +2,34 @@
  * 下划线转帕斯卡
  * @param val
  */
-const toPascalCase = function (name) {
-  const camelCaseName = toCamelCase(name);
-  const pascalCaseName = camelCaseName.slice(0, 1).toUpperCase() + camelCaseName.slice(1);
-  return pascalCaseName;
+const toPascalCase = function (val) {
+  const camelCaseName = toCamelCase(val);
+  return camelCaseName.slice(0, 1).toUpperCase() + camelCaseName.slice(1);
 };
 
 /**
  * 下划线转驼峰
- * @param name
+ * @param val
  */
-const toCamelCase = function (name) {
-  return name.replace(/\_(\w)/g, function (all, letter) {
-    return letter.toUpperCase();
+const toCamelCase = (val) => {
+  return val.replace(/_[a-z]/g, function (s) {
+    return s.substring(1).toUpperCase();
   });
 };
 
 /**
  * 驼峰转换下划线
- * @param name
+ * @param val
  */
-const toLineCase = function (name, isPascalCase = false) {
-  if (isPascalCase) {
-    const kebabCase = name.replace(/([A-Z])/g, '_$1').toLowerCase();
-    return kebabCase.slice(1);
-  } else {
-    return name.replace(/([A-Z])/g, '_$1').toLowerCase();
-  }
+const toLineCase = (val) => {
+  return val.replace(/([A-Z])/g, '_$1').toLowerCase();
 };
 
 const formatKeyCase = (key, type = 'Line2Camel') => {
   if (type === 'Line2Camel') {
-    return key.replace(/\_(\w)/g, function (all, letter) {
-      return letter.toUpperCase();
-    });
+    return toCamelCase(key);
   } else if (type === 'Camel2Line') {
-    return key.replace(/([A-Z])/g, '_$1').toLowerCase();
+    return toLineCase(key);
   } else {
     return key;
   }
@@ -45,19 +37,19 @@ const formatKeyCase = (key, type = 'Line2Camel') => {
 
 const reverseFormatKeyCase = (key, type = 'Line2Camel') => {
   if (type === 'Line2Camel') {
-    return key.replace(/([A-Z])/g, '_$1').toLowerCase();
+    // 驼峰转下划线 做为 下划线转驼峰的反义
+    return toLineCase(key);
   } else if (type === 'Camel2Line') {
-    return key.replace(/\_(\w)/g, function (all, letter) {
-      return letter.toUpperCase();
-    });
+    // 下划线转驼峰 做为 驼峰转下划线的反义
+    return toCamelCase(key);
   } else {
     return key;
   }
 };
 
 /** 返回数据下划线转化为驼峰命名
- * @param {data} 'obj或ary'
- * @param {type} 'Camel' 为下划线转驼峰，'Kebab' 为驼峰转下划线
+ * @param data 'obj或ary'
+ * @param type 'Camel' 为下划线转驼峰，'Kebab' 为驼峰转下划线
  * @return {Array||Object}
  */
 const formatObjCase = (data, type = 'Line2Camel') => {
@@ -70,39 +62,18 @@ const formatObjCase = (data, type = 'Line2Camel') => {
   function toggleFn(list) {
     list.forEach((item) => {
       for (const key in item) {
+        let newKey = key;
         if (type === 'Line2Camel') {
           // 下划线 转 驼峰
-          const keyIndex = key.indexOf('_');
-          // 如果等于0，说明在key最前面有_，此时直接去掉即可
-          if (keyIndex === 0) {
-            const newKey = key.split('');
-            const newValue = item[key];
-            newKey.splice(keyIndex, 1);
-            delete item[key];
-            item[newKey.join('')] = newValue;
-          }
-          if (keyIndex !== -1 && keyIndex !== 0) {
-            const letter = key[keyIndex + 1].toUpperCase();
-            const newKey = key.split('');
-            const newValue = item[key];
-            newKey.splice(keyIndex, 2, letter);
-            delete item[key];
-            item[newKey.join('')] = newValue;
-          }
+          newKey = toCamelCase(key);
         }
         if (type === 'Camel2Line') {
           // 驼峰 转 下划线
-          const regexp = /^[A-Z]+$/;
-          const newKey = key.split('');
-          const newValue = item[key];
-          newKey.forEach((item2, index2) => {
-            if (regexp.test(item2)) {
-              newKey[index2] = '_' + item2.toLowerCase();
-            }
-          });
-          delete item[key];
-          item[newKey.join('')] = newValue;
+          newKey = toLineCase(key);
         }
+        const newValue = item[key];
+        delete item[key];
+        item[newKey] = newValue;
         // 如果值为对象
         if (Object.prototype.toString.call(item[key]) === '[object Object]') {
           toggleFn([item[key]]);
@@ -135,39 +106,18 @@ const reverseFormatObjCase = (data, type = 'Line2Camel') => {
   function toggleFn(list) {
     list.forEach((item) => {
       for (const key in item) {
+        let newKey = key;
         if (type === 'Camel2Line') {
           // 下划线转驼峰 做为 驼峰转下划线的反义
-          const keyIndex = key.indexOf('_');
-          // 如果等于0，说明在key最前面有_，此时直接去掉即可
-          if (keyIndex === 0) {
-            const newKey = key.split('');
-            const newValue = item[key];
-            newKey.splice(keyIndex, 1);
-            delete item[key];
-            item[newKey.join('')] = newValue;
-          }
-          if (keyIndex !== -1 && keyIndex !== 0) {
-            const letter = key[keyIndex + 1].toUpperCase();
-            const newKey = key.split('');
-            const newValue = item[key];
-            newKey.splice(keyIndex, 2, letter);
-            delete item[key];
-            item[newKey.join('')] = newValue;
-          }
+          newKey = toCamelCase(key);
         }
         if (type === 'Line2Camel') {
           // 驼峰转下划线 做为 下划线转驼峰的反义
-          const regexp = /^[A-Z]+$/;
-          const newKey = key.split('');
-          const newValue = item[key];
-          newKey.forEach((item2, index2) => {
-            if (regexp.test(item2)) {
-              newKey[index2] = '_' + item2.toLowerCase();
-            }
-          });
-          delete item[key];
-          item[newKey.join('')] = newValue;
+          newKey = toLineCase(key);
         }
+        const newValue = item[key];
+        delete item[key];
+        item[newKey] = newValue;
         // 如果值为对象
         if (Object.prototype.toString.call(item[key]) === '[object Object]') {
           toggleFn([item[key]]);

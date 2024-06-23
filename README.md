@@ -677,4 +677,4 @@ module.exports = UserModel;
 - 0.0.13
   - 2024/06/22 修复动态路由，子属性为index的问题
   - 2024/06/22 补充动态路由的使用方法
-  - 2024/06/23 补充Service字段转换内置，部分重置Service使用
+  - 2024/06/23 补充Service字段转换内置,部分重置Service使用,提供DefaultService

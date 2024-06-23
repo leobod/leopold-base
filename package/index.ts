@@ -3,6 +3,8 @@ export { Leopold } from './base/Leopold';
 export { SQLModel } from './model/SQLModel';
 export { SQLModelType } from './model/SQLModelType';
 export { SQLObject } from './model/SQLObject';
+export { Service } from './model/Service';
+export { DefaultService } from './model/DefaultService';
 
 export { AppLog } from './loader/AppLog';
 export { Assets } from './loader/Assets';
@@ -21,7 +23,6 @@ export { DbFactory } from './plugin/DbFactory';
 export { MailSender, MailFactory } from './plugin/MailFactory';
 export { MysqlRDB } from './plugin/MysqlRDB';
 export { RedisRDB } from './plugin/RedisRDB';
-export { Service } from './plugin/Service';
 export { ScheduleFactory } from './plugin/ScheduleFactory';
 export { WebsocketFactory } from './plugin/WebsocketFactory';
 

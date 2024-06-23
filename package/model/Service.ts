@@ -1,5 +1,5 @@
 import { Context } from 'koa';
-import { SQLModel } from '../model/SQLModel';
+import { SQLModel } from './SQLModel';
 import { filterDbResult } from '../utils/filter';
 import { getRequiredRules, validateRules } from '../utils/validator';
 import { formatDate } from '../utils/dayjs';
@@ -26,7 +26,7 @@ export class Service {
    * @param ctx {Context}
    * @returns {Promise<*>}
    */
-  async create(ctx: Context): Promise<any> {
+  async create(ctx: Context, params = {}, opts = {}): Promise<any> {
     const { model } = this;
     const sql = model.create().toSql();
     try {
@@ -42,7 +42,7 @@ export class Service {
    * @param params
    * @returns {Promise<*>}
    */
-  async count(ctx: Context, params = {}): Promise<any> {
+  async count(ctx: Context, params = {}, opts = {}): Promise<any> {
     const { model } = this;
     const sql = model.count().where(reverseFormatObjCase(params, this.format)).toSql();
     const res = await ctx.db.mysql.query(sql.sql, sql.bindings);
@@ -151,7 +151,7 @@ export class Service {
    * @param params
    * @returns {Promise<*>}
    */
-  async add(ctx: Context, params = {}): Promise<any> {
+  async add(ctx: Context, params = {}, opts = {}): Promise<any> {
     const { model } = this;
     const saveParams = reverseFormatObjCase(params, this.format);
     const rules = getRequiredRules(model);
