@@ -3,11 +3,23 @@ import { SQLModel } from '../model/SQLModel';
 import { filterDbResult } from '../utils/filter';
 import { getRequiredRules, validateRules } from '../utils/validator';
 import { formatDate } from '../utils/dayjs';
+import {
+  formatObjCase,
+  reverseFormatKeyCase,
+  reverseFormatObjCase
+} from '../utils/namecase';
 
 export class Service {
   model: SQLModel;
-  constructor(model: SQLModel) {
+  format: string;
+  constructor(
+    model: SQLModel,
+    opts = {
+      format: 'Origin' // 可选 Origin, Camel2Line, Line2Camel
+    }
+  ) {
     this.model = model;
+    this.format = opts.format || 'Origin';
   }
   /**
    * 创建表格
@@ -18,7 +30,7 @@ export class Service {
     const { model } = this;
     const sql = model.create().toSql();
     try {
-      ctx.body = ctx.result(await ctx.db.mysql.query(sql.sql, sql.bindings));
+      return await ctx.db.mysql.query(sql.sql, sql.bindings);
     } catch (e) {
       throw e;
     }
@@ -32,7 +44,7 @@ export class Service {
    */
   async count(ctx: Context, params = {}): Promise<any> {
     const { model } = this;
-    const sql = model.count().where(params).toSql();
+    const sql = model.count().where(reverseFormatObjCase(params, this.format)).toSql();
     const res = await ctx.db.mysql.query(sql.sql, sql.bindings);
     if (res && res.length > 0) {
       return res[0].total;
@@ -42,48 +54,47 @@ export class Service {
   }
 
   /**
-   * 记录分页详情
-   * @param ctx {Context}
-   * @param params
-   */
-  async page(
-    ctx: Context,
-    params = {} as {
-      page_num?: number;
-      page_size?: number;
-    }
-  ): Promise<any> {
-    const { page_num = 1, page_size = 1 } = params;
-    const pageCond = Object.assign({}, params);
-    delete pageCond.page_num;
-    delete pageCond.page_size;
-    const countResult = await this.count(ctx, pageCond);
-    let total_page = 1;
-    let total_size = countResult;
-    if (page_size && page_size > 0) {
-      total_page = Math.ceil(total_size / page_size);
-    }
-    return {
-      total_page,
-      total_size
-    };
-  }
-
-  /**
    * 记录列表
    * @param ctx {Context}
    * @param params
    * @returns {Promise<*>}
    */
-  async list(ctx: Context, params = {}): Promise<any> {
+  async list(
+    ctx: Context,
+    params = {},
+    opts = {
+      page_num_key: 'page_num',
+      page_szie_key: 'page_size'
+    }
+  ): Promise<any> {
+    const { page_num_key = 'page_num', page_szie_key = 'page_size' } = opts;
     const { model } = this;
     try {
-      const res = await this.page(ctx, params);
-      const sql = model.select(['*']).where(params).toSql();
+      const page_num = params[page_num_key];
+      const page_size = params[page_szie_key];
+      let pageCond = Object.assign({}, params);
+      delete pageCond[page_num_key];
+      delete pageCond[page_szie_key];
+      pageCond = reverseFormatObjCase(pageCond, this.format);
+      const countResult = await this.count(ctx, pageCond);
+      let total_page = 1;
+      let total_size = countResult;
+      if (page_size && page_size > 0) {
+        total_page = Math.ceil(total_size / page_size);
+      }
+      const res = {
+        list: null,
+        total_page,
+        total_size
+      };
+      const sql = model
+        .select(['*'])
+        .where(reverseFormatObjCase(params, this.format))
+        .toSql();
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       const userFilter = model._filter || {};
       res.list = filterDbResult(dbResult, userFilter);
-      ctx.body = ctx.result(res);
+      return formatObjCase(res, this.format);
     } catch (e) {
       throw e;
     }
@@ -95,17 +106,39 @@ export class Service {
    * @param params
    * @returns {Promise<*>}
    */
-  async listOne(ctx: Context, params = {}): Promise<any> {
+  async listOne(
+    ctx: Context,
+    params = {},
+    opts = {
+      order_by_has: true,
+      order_by_key: 'create_at',
+      order_by_val: 'DESC'
+    }
+  ): Promise<any> {
+    const {
+      order_by_has = true,
+      order_by_key = 'create_at',
+      order_by_val = 'DESC'
+    } = opts;
     const { model } = this;
     try {
-      const sql = model.select(['*']).where(params).orderBy('create_at', 'DESC').toSql();
+      let sql: any = { sql: '', bindings: [] };
+      if (order_by_has) {
+        sql = model
+          .select(['*'])
+          .where(reverseFormatObjCase(params, this.format))
+          .orderBy(order_by_key, order_by_val)
+          .toSql();
+      } else {
+        sql = model.select(['*']).where(params).toSql();
+      }
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       const userFilter = model._filter || {};
       const filterResult = filterDbResult(dbResult, userFilter);
       if (filterResult && filterResult.length > 0) {
-        ctx.body = ctx.result(filterResult[0]);
+        return formatObjCase(filterResult[0], this.format);
       } else {
-        ctx.body = ctx.result(null);
+        return null;
       }
     } catch (e) {
       throw e;
@@ -120,7 +153,7 @@ export class Service {
    */
   async add(ctx: Context, params = {}): Promise<any> {
     const { model } = this;
-    const saveParams = params;
+    const saveParams = reverseFormatObjCase(params, this.format);
     const rules = getRequiredRules(model);
     const [err, errMsg] = validateRules(saveParams, rules);
     if (!err) {
@@ -130,9 +163,9 @@ export class Service {
         /* OkPacket { fieldCount: 0, affectedRows: 1, insertId: 0, serverStatus: 2,
                     warningCount: 0, message: '', protocol41: true, changedRows: 0 } */
         if (dbResult && dbResult.affectedRows > 0) {
-          ctx.body = ctx.result('success');
+          return 'success';
         } else {
-          ctx.body = ctx.result('');
+          return null;
         }
       } catch (e) {
         throw e;
@@ -176,15 +209,18 @@ export class Service {
       }
     }
     delete modelObj[pk];
-    const sql = model.update(modelObj).where(condParams).toSql();
+    const sql = model
+      .update(reverseFormatObjCase(modelObj, this.format))
+      .where(reverseFormatObjCase(condParams, this.format))
+      .toSql();
     try {
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       /* OkPacket { fieldCount: 0, affectedRows: 1, insertId: 0, serverStatus: 2,
                   warningCount: 0, message: '', protocol41: true, changedRows: 1 } */
       if (dbResult) {
-        ctx.body = ctx.result('success');
+        return 'success';
       } else {
-        ctx.body = ctx.result('');
+        return null;
       }
     } catch (e) {
       throw e;
@@ -222,15 +258,18 @@ export class Service {
       updateParams[update_time_key] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
     }
     const modelObj = { [soft_remove_key]: soft_remove_val };
-    const sql = model.update(modelObj).where(condParams).toSql();
+    const sql = model
+      .update(reverseFormatObjCase(modelObj, this.format))
+      .where(reverseFormatObjCase(condParams, this.format))
+      .toSql();
     try {
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       /* OkPacket { fieldCount: 0, affectedRows: 1, insertId: 0, serverStatus: 2,
                 warningCount: 0, message: '', protocol41: true, changedRows: 1 } */
       if (dbResult) {
-        ctx.body = ctx.result('success');
+        return 'success';
       } else {
-        ctx.body = ctx.result('');
+        return null;
       }
     } catch (e) {
       throw e;
@@ -247,13 +286,16 @@ export class Service {
     const { pk = 'code' } = opts;
     const { model } = this;
     const condParams = { [pk]: params[pk] };
-    const sql = model.remove().where(condParams).toSql();
+    const sql = model
+      .remove()
+      .where(reverseFormatObjCase(condParams, this.format))
+      .toSql();
     try {
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       if (dbResult) {
-        ctx.body = ctx.result('success');
+        return 'success';
       } else {
-        ctx.body = ctx.result('');
+        return null;
       }
     } catch (e) {
       throw e;
