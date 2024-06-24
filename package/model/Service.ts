@@ -9,7 +9,7 @@ import {
   reverseFormatKeyCase,
   reverseFormatObjCase
 } from '../utils/namecase';
-import _ from "lodash";
+import _ from 'lodash';
 
 export class Service {
   model: SQLModel;
@@ -259,11 +259,12 @@ export class Service {
   async edit(ctx: Context, params = {}, opts = {}): Promise<any> {
     const { pk, update_time_modify, update_time_key } = this;
     const { model } = this;
-    const updateParams = params;
+    let updateParams = params;
     const condParams = { [pk]: updateParams[pk] };
     if (update_time_modify && update_time_key && !updateParams[update_time_key]) {
       updateParams[update_time_key] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
     }
+    updateParams = reverseFormatObjCase(updateParams, this.format);
     const _column = Object.keys(model._column);
     const modelObj = {};
     for (const key in updateParams) {
@@ -273,7 +274,7 @@ export class Service {
     }
     delete modelObj[pk];
     const sql = model
-      .update(reverseFormatObjCase(modelObj, this.format))
+      .update(modelObj)
       .where(reverseFormatObjCase(condParams, this.format))
       .toSql();
     try {
