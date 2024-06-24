@@ -9,6 +9,7 @@ import {
   reverseFormatKeyCase,
   reverseFormatObjCase
 } from '../utils/namecase';
+import _ from "lodash";
 
 export class Service {
   model: SQLModel;
@@ -47,28 +48,48 @@ export class Service {
     }
   ) {
     this.model = model;
-    this.format = opts.format || 'Origin';
-    this.format_key = opts.format_key;
-    this.error_custom = opts.error_custom;
-    this.error_message = opts.error_message;
-    this.order_by_has = opts.order_by_has;
-    this.order_by_val = opts.order_by_val;
-    this.update_time_modify = opts.update_time_modify;
-    this.soft_remove_val = opts.soft_remove_val;
+    const finalOpts = _.merge(
+      {},
+      {
+        format: 'Origin', // 可选 Origin, Camel2Line, Line2Camel
+        format_key: true,
+        error_custom: true,
+        error_message: 'Unknown Error',
+        page_num_key: 'page_num',
+        page_size_key: 'page_size',
+        order_by_has: true,
+        order_by_key: 'create_at',
+        order_by_val: 'DESC',
+        update_time_modify: true,
+        update_time_key: 'update_at',
+        soft_remove_key: 'state',
+        soft_remove_val: 0,
+        pk: 'code'
+      },
+      opts
+    );
+    this.format = finalOpts.format || 'Origin';
+    this.format_key = finalOpts.format_key;
+    this.error_custom = finalOpts.error_custom;
+    this.error_message = finalOpts.error_message;
+    this.order_by_has = finalOpts.order_by_has;
+    this.order_by_val = finalOpts.order_by_val;
+    this.update_time_modify = finalOpts.update_time_modify;
+    this.soft_remove_val = finalOpts.soft_remove_val;
     if (this.format_key) {
-      this.page_num_key = formatKeyCase(opts.page_num_key, this.format);
-      this.page_size_key = formatKeyCase(opts.page_size_key, this.format);
-      this.order_by_key = formatKeyCase(opts.order_by_key, this.format);
-      this.update_time_key = formatKeyCase(opts.update_time_key, this.format);
-      this.soft_remove_key = formatKeyCase(opts.soft_remove_key, this.format);
-      this.pk = opts.pk;
+      this.page_num_key = formatKeyCase(finalOpts.page_num_key, this.format);
+      this.page_size_key = formatKeyCase(finalOpts.page_size_key, this.format);
+      this.order_by_key = formatKeyCase(finalOpts.order_by_key, this.format);
+      this.update_time_key = formatKeyCase(finalOpts.update_time_key, this.format);
+      this.soft_remove_key = formatKeyCase(finalOpts.soft_remove_key, this.format);
+      this.pk = finalOpts.pk;
     } else {
-      this.page_num_key = opts.page_num_key;
-      this.page_size_key = opts.page_size_key;
-      this.order_by_key = opts.order_by_key;
-      this.update_time_key = opts.update_time_key;
-      this.soft_remove_key = opts.soft_remove_key;
-      this.pk = opts.pk;
+      this.page_num_key = finalOpts.page_num_key;
+      this.page_size_key = finalOpts.page_size_key;
+      this.order_by_key = finalOpts.order_by_key;
+      this.update_time_key = finalOpts.update_time_key;
+      this.soft_remove_key = finalOpts.soft_remove_key;
+      this.pk = finalOpts.pk;
     }
   }
   /**
