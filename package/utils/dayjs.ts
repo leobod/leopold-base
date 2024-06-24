@@ -107,4 +107,14 @@ const getIsToday = (d) => {
   return result;
 };
 
-export { formatDate, toDate, getStartOfHour, getEndOfWeek, getStartOfMonth, getMaxDateOfMonth, getEndOfMonth, getCloserDateTime, getIsToday };
+export {
+  formatDate,
+  toDate,
+  getStartOfHour,
+  getEndOfWeek,
+  getStartOfMonth,
+  getMaxDateOfMonth,
+  getEndOfMonth,
+  getCloserDateTime,
+  getIsToday
+};

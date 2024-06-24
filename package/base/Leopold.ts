@@ -7,9 +7,9 @@ import { UniResponseType } from '../loader/Result';
 import { DbManager } from '../plugin/DbFactory';
 import { ScheduleManager } from '../plugin/ScheduleFactory';
 import { WebSocketServer } from 'ws';
-import {MailManager} from "../plugin/MailFactory";
-import {MysqlRDB} from "../plugin/MysqlRDB";
-import {RedisRDB} from "../plugin/RedisRDB";
+import { MailManager } from '../plugin/MailFactory';
+import { MysqlRDB } from '../plugin/MysqlRDB';
+import { RedisRDB } from '../plugin/RedisRDB';
 
 interface LeopoldConfig {
   path?: string;

@@ -4,6 +4,7 @@ import { filterDbResult } from '../utils/filter';
 import { getRequiredRules, validateRules } from '../utils/validator';
 import { formatDate } from '../utils/dayjs';
 import {
+  formatKeyCase,
   formatObjCase,
   reverseFormatKeyCase,
   reverseFormatObjCase
@@ -12,18 +13,68 @@ import {
 export class Service {
   model: SQLModel;
   format: string;
+  format_key: boolean;
+  error_custom: boolean;
+  error_message: string;
+  page_num_key: string;
+  page_size_key: string;
+  order_by_has: boolean;
+  order_by_key: string;
+  order_by_val: any;
+  update_time_modify: boolean;
+  update_time_key: string;
+  soft_remove_key: string;
+  soft_remove_val: any;
+  pk: string;
+
   constructor(
     model: SQLModel,
     opts = {
-      format: 'Origin' // 可选 Origin, Camel2Line, Line2Camel
+      format: 'Origin', // 可选 Origin, Camel2Line, Line2Camel
+      format_key: true,
+      error_custom: true,
+      error_message: 'Unknown Error',
+      page_num_key: 'page_num',
+      page_size_key: 'page_size',
+      order_by_has: true,
+      order_by_key: 'create_at',
+      order_by_val: 'DESC',
+      update_time_modify: true,
+      update_time_key: 'update_at',
+      soft_remove_key: 'state',
+      soft_remove_val: 0,
+      pk: 'code'
     }
   ) {
     this.model = model;
     this.format = opts.format || 'Origin';
+    this.format_key = opts.format_key;
+    this.error_custom = opts.error_custom;
+    this.error_message = opts.error_message;
+    this.order_by_has = opts.order_by_has;
+    this.order_by_val = opts.order_by_val;
+    this.update_time_modify = opts.update_time_modify;
+    this.soft_remove_val = opts.soft_remove_val;
+    if (this.format_key) {
+      this.page_num_key = formatKeyCase(opts.page_num_key, this.format);
+      this.page_size_key = formatKeyCase(opts.page_size_key, this.format);
+      this.order_by_key = formatKeyCase(opts.order_by_key, this.format);
+      this.update_time_key = formatKeyCase(opts.update_time_key, this.format);
+      this.soft_remove_key = formatKeyCase(opts.soft_remove_key, this.format);
+      this.pk = opts.pk;
+    } else {
+      this.page_num_key = opts.page_num_key;
+      this.page_size_key = opts.page_size_key;
+      this.order_by_key = opts.order_by_key;
+      this.update_time_key = opts.update_time_key;
+      this.soft_remove_key = opts.soft_remove_key;
+      this.pk = opts.pk;
+    }
   }
   /**
    * 创建表格
    * @param ctx {Context}
+   * @param opts
    * @returns {Promise<*>}
    */
   async create(ctx: Context, params = {}, opts = {}): Promise<any> {
@@ -32,7 +83,11 @@ export class Service {
     try {
       return await ctx.db.mysql.query(sql.sql, sql.bindings);
     } catch (e) {
-      throw e;
+      if (this.error_custom) {
+        throw new Error(this.error_message);
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -40,6 +95,7 @@ export class Service {
    * 记录总数
    * @param ctx {Context}
    * @param params
+   * @param opts
    * @returns {Promise<*>}
    */
   async count(ctx: Context, params = {}, opts = {}): Promise<any> {
@@ -57,24 +113,18 @@ export class Service {
    * 记录列表
    * @param ctx {Context}
    * @param params
+   * @param opts
    * @returns {Promise<*>}
    */
-  async list(
-    ctx: Context,
-    params = {},
-    opts = {
-      page_num_key: 'page_num',
-      page_szie_key: 'page_size'
-    }
-  ): Promise<any> {
-    const { page_num_key = 'page_num', page_szie_key = 'page_size' } = opts;
+  async list(ctx: Context, params = {}, opts = {}): Promise<any> {
+    const { page_num_key, page_size_key } = this;
     const { model } = this;
     try {
       const page_num = params[page_num_key];
-      const page_size = params[page_szie_key];
+      const page_size = params[page_size_key];
       let pageCond = Object.assign({}, params);
       delete pageCond[page_num_key];
-      delete pageCond[page_szie_key];
+      delete pageCond[page_size_key];
       pageCond = reverseFormatObjCase(pageCond, this.format);
       const countResult = await this.count(ctx, pageCond);
       let total_page = 1;
@@ -97,7 +147,11 @@ export class Service {
       res.list = filterDbResult(dbResult, userFilter);
       return formatObjCase(res, this.format);
     } catch (e) {
-      throw e;
+      if (this.error_custom) {
+        throw new Error(this.error_message);
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -105,22 +159,11 @@ export class Service {
    * 查询单个model
    * @param ctx {Context}
    * @param params
+   * @param opts
    * @returns {Promise<*>}
    */
-  async listOne(
-    ctx: Context,
-    params = {},
-    opts = {
-      order_by_has: true,
-      order_by_key: 'create_at',
-      order_by_val: 'DESC'
-    }
-  ): Promise<any> {
-    const {
-      order_by_has = true,
-      order_by_key = 'create_at',
-      order_by_val = 'DESC'
-    } = opts;
+  async listOne(ctx: Context, params = {}, opts = {}): Promise<any> {
+    const { order_by_has, order_by_key, order_by_val } = this;
     const { model } = this;
     try {
       let sql: any = { sql: '', bindings: [] };
@@ -142,7 +185,11 @@ export class Service {
         return null;
       }
     } catch (e) {
-      throw e;
+      if (this.error_custom) {
+        throw new Error(this.error_message);
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -150,6 +197,7 @@ export class Service {
    * 新建
    * @param ctx {Context}
    * @param params
+   * @param opts
    * @returns {Promise<*>}
    */
   async add(ctx: Context, params = {}, opts = {}): Promise<any> {
@@ -169,7 +217,11 @@ export class Service {
           return null;
         }
       } catch (e) {
-        throw e;
+        if (this.error_custom) {
+          throw new Error(this.error_message);
+        } else {
+          throw e;
+        }
       }
     } else {
       throw new Error(errMsg as string);
@@ -180,22 +232,11 @@ export class Service {
    * 更新
    * @param ctx {Context}
    * @param params
+   * @param opts
    * @returns {Promise<*>}
    */
-  async edit(
-    ctx: Context,
-    params = {},
-    opts = {
-      update_time_modify: true,
-      update_time_key: 'update_at',
-      pk: 'code'
-    }
-  ): Promise<any> {
-    const {
-      pk = 'code',
-      update_time_modify = true,
-      update_time_key = 'update_at'
-    } = opts;
+  async edit(ctx: Context, params = {}, opts = {}): Promise<any> {
+    const { pk, update_time_modify, update_time_key } = this;
     const { model } = this;
     const updateParams = params;
     const condParams = { [pk]: updateParams[pk] };
@@ -224,7 +265,11 @@ export class Service {
         return null;
       }
     } catch (e) {
-      throw e;
+      if (this.error_custom) {
+        throw new Error(this.error_message);
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -232,26 +277,17 @@ export class Service {
    * 软移除
    * @param ctx {Context}
    * @param params
+   * @param opts
    * @returns {Promise<*>}
    */
-  async softRemove(
-    ctx: Context,
-    params = {},
-    opts = {
-      update_time_modify: true,
-      update_time_key: 'update_at',
-      soft_remove_key: 'state',
-      soft_remove_val: 0,
-      pk: 'code'
-    }
-  ): Promise<any> {
+  async softRemove(ctx: Context, params = {}, opts = {}): Promise<any> {
     const {
-      pk = 'code',
-      update_time_modify = true,
-      update_time_key = 'update_at',
-      soft_remove_key = 'state',
+      pk,
+      update_time_modify,
+      update_time_key,
+      soft_remove_key,
       soft_remove_val = 0
-    } = opts;
+    } = this;
     const { model } = this;
     const updateParams = params;
     const condParams = { [pk]: params[pk] };
@@ -273,18 +309,23 @@ export class Service {
         return null;
       }
     } catch (e) {
-      throw e;
+      if (this.error_custom) {
+        throw new Error(this.error_message);
+      } else {
+        throw e;
+      }
     }
   }
 
-  async remove(
-    ctx: Context,
-    params = {},
-    opts = {
-      pk: 'code'
-    }
-  ): Promise<any> {
-    const { pk = 'code' } = opts;
+  /**
+   * 移除
+   * @param ctx {Context}
+   * @param params
+   * @param opts
+   * @returns {Promise<*>}
+   */
+  async remove(ctx: Context, params = {}, opts = {}): Promise<any> {
+    const { pk } = this;
     const { model } = this;
     const condParams = { [pk]: params[pk] };
     const sql = model
@@ -299,7 +340,11 @@ export class Service {
         return null;
       }
     } catch (e) {
-      throw e;
+      if (this.error_custom) {
+        throw new Error(this.error_message);
+      } else {
+        throw e;
+      }
     }
   }
 }

@@ -145,398 +145,8 @@ leopold.start();
 ## CURD 范例
 
 ```javascript
-// dayjs.js
-const dayjs = require('dayjs');
-dayjs.locale('zh-cn');
-
-/**
- * 日期格式化
- * @param d
- * @param format  YYYY/MM/DD HH:mm:ss
- */
-const formatDate = (d, format = 'YYYY/MM/DD HH:mm:ss') => {
-  return dayjs(d).format(format);
-};
-
-// filter.ts.js
-/**
- * 使用model过滤结果集
- * @param dbResult
- * @param filter
- * @returns {*}
- */
-const filterDbResult = (dbResult, filter) => {
-  if (dbResult) {
-    return dbResult.map((item) => {
-      for (const key in filter) {
-        const filterFn = filter[key];
-        if (item[key] !== undefined && item[key] !== null) {
-          item[key] = filterFn(item[key], item) || item[key];
-        }
-      }
-      return item;
-    });
-  } else {
-    return [];
-  }
-};
-
-module.exports = {
-  filterDbResult
-};
-
-// validator.js
-/**
- * 收集必填的规则
- * @param model
- * @returns {{}}
- */
-const getRequiredRules = (model) => {
-  let validator = {};
-  for (const key in model._column) {
-    validator[key] = [];
-    const columnItem = model._column[key];
-    if (
-      columnItem.primaryKey ||
-      (columnItem.allowNull !== void 0 && !columnItem.allowNull)
-    ) {
-      if (!columnItem.defaultExpr) {
-        const requiredFn = (val) => {
-          if (val) return true;
-          else return false;
-        };
-        validator[key].push({
-          message: `字段${key}需要必填，请检查输入`,
-          fn: requiredFn
-        });
-      }
-    }
-  }
-  return validator;
-};
-
-/**
- * 根据必填项验证参数
- * @param params
- * @param rules
- * @returns {[boolean,string]}
- */
-const validateRules = (params = {}, rules = {}) => {
-  let err = false;
-  let errMsg = '';
-  for (const key in rules) {
-    const validList = rules[key];
-    if (validList && validList.length > 0) {
-      for (const validItem of validList) {
-        if (!validItem.fn(params[key])) {
-          err = true;
-          errMsg = validItem.message;
-        }
-      }
-    }
-  }
-  return [err, errMsg];
-};
-
-module.exports = {
-  getRequiredRules,
-  validateRules
-};
-
-// serviceUtil.js
-const { formatDate } = require('./dayjs');
-const { filterDbResult } = require('./filter.ts');
-const { getRequiredRules, validateRules } = require('./validator');
-// const { formatHumpLineTransfer } = require('../utils/formatter');
-
-/**
- * 创建表格
- * @param ctx
- * @param model
- * @returns {Promise<{msg: string, errCode: number, msgZh: string}>}
- */
-const createTable = async (ctx, model) => {
-  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-  const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-  const sql = model.create().toSql();
-  try {
-    res.data = await ctx.db.mysql.query(sql.sql, sql.bindings);
-    return res;
-  } catch (e) {
-    err.data = e.message;
-    return err;
-  }
-};
-
-/**
- * 记录总数
- * @param ctx
- * @param model
- * @param cond
- * @returns {Promise<*>}
- */
-const count = async (ctx, model, cond = {}) => {
-  const { mysql } = ctx.$root.DB;
-  const sql = model.count().toSql();
-  const res = await ctx.db.mysql.query(sql.sql, sql.bindings);
-  if (res && res.length > 0) {
-    return res[0].total;
-  } else {
-    return null;
-  }
-};
-
-/**
- * 记录分页详情
- * @param ctx
- * @param model
- * @param cond
- * @returns {Promise<*>}
- */
-const page = async (ctx, model, cond = {}) => {
-  const countResult = await count(ctx, model, cond);
-  let totalPage = 1;
-  let totalSize = countResult;
-  if (cond.pageSize && cond.pageSize > 0) {
-    totalPage = Math.ceil(totalSize / cond.pageSize);
-  }
-  return {
-    totalPage,
-    totalSize
-  };
-};
-
-/**
- * 记录列表
- * @param ctx
- * @param model
- * @param cond
- * @returns {Promise<*>}
- */
-const list = async (ctx, model, cond = {}) => {
-  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-  const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-  try {
-    const pageResult = await page(ctx, model, cond);
-    const sql = model.select(['*']).where(cond).toSql();
-    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-    const userFilter = model._filter || {};
-    pageResult.list = filterDbResult(dbResult, userFilter);
-    res.data = pageResult;
-    return res;
-  } catch (e) {
-    console.log(e);
-    err.data = e.message;
-    return err;
-  }
-};
-
-/**
- * 查询单个model
- * @param ctx
- * @param model
- * @param cond
- * @returns {Promise<null|*>}
- */
-const listOne = async (ctx, model, cond = {}) => {
-  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-  const err = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-  try {
-    const sql = model.select(['*']).where(cond).orderBy('create_at', 'DESC').toSql();
-    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-    const userFilter = model._filter || {};
-    const filterResult = filterDbResult(dbResult, userFilter);
-    if (filterResult && filterResult.length > 0) {
-      res.data = filterResult[0];
-    } else {
-      res.data = null;
-    }
-    return res;
-  } catch (e) {
-    err.data = e.message;
-    return err;
-  }
-};
-
-/**
- * 新建
- * @param ctx
- * @param model
- * @param params
- * @returns {Promise<void>}
- */
-const save = async (ctx, model, params = {}) => {
-  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-  const paramErr = Object.assign({}, ctx.result.STATUS_CODE.PARAM_ERROR);
-  const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-  const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-  const rules = getRequiredRules(model);
-  const [err, errMsg] = validateRules(params, rules);
-  if (!err) {
-    const sql = model.insert(params).toSql();
-    try {
-      const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-      /*
-              OkPacket {
-                fieldCount: 0,
-                affectedRows: 1,
-                insertId: 0,
-                serverStatus: 2,
-                warningCount: 0,
-                message: '',
-                protocol41: true,
-                changedRows: 0
-              }
-             */
-      if (dbResult && dbResult.affectedRows > 0) {
-        res.data = 'success';
-        return res;
-      } else {
-        return unknownErr;
-      }
-    } catch (e) {
-      sqlErr.data = e.message;
-      return sqlErr;
-    }
-  } else {
-    paramErr.data = errMsg;
-    return paramErr;
-  }
-};
-
-/**
- * 更新
- * @param ctx
- * @param model
- * @param params
- * @param isUpdateAt
- * @param pk
- * @returns {Promise<void>}
- */
-const update = async (ctx, model, params = {}, isUpdateAt = true, pk = 'code') => {
-  if (isUpdateAt && !params['update_at']) {
-    params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
-  }
-  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-  const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-  const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-  const cond = { [pk]: params[pk] };
-  const modelObj = Object.assign({}, params);
-  delete modelObj[pk];
-  const sql = model.update(modelObj).where(cond).toSql();
-  try {
-    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-    /*
-            OkPacket {
-              fieldCount: 0,
-              affectedRows: 1,
-              insertId: 0,
-              serverStatus: 2,
-              warningCount: 0,
-              message: '',
-              protocol41: true,
-              changedRows: 1
-            }
-           */
-    if (dbResult) {
-      res.data = 'success';
-      return res;
-    } else {
-      return unknownErr;
-    }
-  } catch (e) {
-    sqlErr.data = e.message;
-    return sqlErr;
-  }
-};
-
-/**
- * 软移除
- * @param ctx
- * @param model
- * @param params
- * @param isUpdateAt
- * @param softKey
- * @param pk
- * @returns {Promise<void>}
- */
-const remove = async (
-  ctx,
-  model,
-  params = {},
-  isUpdateAt = true,
-  softKey = 'state',
-  pk = 'code'
-) => {
-  if (isUpdateAt && !params['update_at']) {
-    params['update_at'] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
-  }
-  const res = Object.assign({}, ctx.result.STATUS_CODE.SUCCESS);
-  const sqlErr = Object.assign({}, ctx.result.STATUS_CODE.SQL_ERROR);
-  const unknownErr = Object.assign({}, ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-  const cond = { [pk]: params[pk] };
-  const modelObj = { [softKey]: 3 };
-  delete model[pk];
-  const sql = model.update(modelObj).where(cond).toSql();
-  try {
-    const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
-    /*
-          OkPacket {
-            fieldCount: 0,
-            affectedRows: 1,
-            insertId: 0,
-            serverStatus: 2,
-            warningCount: 0,
-            message: '',
-            protocol41: true,
-            changedRows: 1
-          }
-         */
-    if (dbResult) {
-      res.data = 'success';
-      return res;
-    } else {
-      return unknownErr;
-    }
-  } catch (e) {
-    sqlErr.data = e.message;
-    return sqlErr;
-  }
-};
-
-module.exports = {
-  createTable,
-  count,
-  list,
-  listOne,
-  save,
-  update,
-  remove
-};
-
-// server/user/list.js 中使用
-const serviceUtil = require('../../utils/serviceUtil');
-const UserModel = require('../../model/UserModel');
-
-/**
- * 查询用户列表
- * @param ctx
- * @returns {Promise<void>}
- */
-module.exports = async (ctx) => {
-  if (ctx.method === 'POST') {
-    ctx.body = await serviceUtil.list(ctx, UserModel, ctx.request.body);
-  } else if (ctx.method === 'GET') {
-    ctx.body = Result.fail(null, 'unsupported', ctx.result.STATUS_CODE.UNKNOWN_ERROR);
-  }
-};
-```
-
-## Model定义参考
-
-```javascript
+// server/model/UserModel.js
 const { SQLModel, SQLModelType } = require('@esidecn/leopold-base');
-
 const UserModel = new SQLModel({
   table: 'tb_user',
   column: {
@@ -546,12 +156,6 @@ const UserModel = new SQLModel({
       unique: true,
       primaryKey: true,
       comment: '用户code'
-    },
-    fk_group: {
-      type: SQLModelType.VARCHAR(100),
-      allowNull: false,
-      defaultExpr: 'leopold',
-      comment: '用户所在group'
     },
     fk_department: {
       type: SQLModelType.VARCHAR(100),
@@ -573,30 +177,10 @@ const UserModel = new SQLModel({
       type: SQLModelType.VARCHAR(50),
       comment: '用户名称'
     },
-    description: {
-      type: SQLModelType.VARCHAR(100),
-      comment: '用户描述'
-    },
     sex: {
       type: SQLModelType.INTEGER(),
       defaultExpr: '0',
       comment: '用户性别 男(1) 女(2) 未知(0)'
-    },
-    phone_area_code: {
-      type: SQLModelType.VARCHAR(10),
-      defaultExpr: '86'
-    },
-    phone: {
-      type: SQLModelType.VARCHAR(20)
-    },
-    email: {
-      type: SQLModelType.VARCHAR(20)
-    },
-    state: {
-      type: SQLModelType.INTEGER(),
-      allowNull: false,
-      defaultExpr: '1',
-      comment: '正常(1) 锁定(2) 注销(3)'
     },
     update_at: {
       type: SQLModelType.DATETIME(),
@@ -624,26 +208,50 @@ const UserModel = new SQLModel({
         row.sex_name = '未知';
       }
       return val;
-    },
-    phone: (val, row = {}) => {
-      let phone = val;
-      phone = phone.replace(phone.substring(3, 7), '****');
-      return phone;
-    },
-    state: (val, row = {}) => {
-      if (val === 1) {
-        row.state_name = '正常';
-      } else if (val === 2) {
-        row.state_name = '锁定';
-      } else {
-        row.state_name = '注销';
-      }
-      return val;
     }
   }
 });
-
 module.exports = UserModel;
+
+// server/services/UserService
+const { Service } = require('@eside/leopold');
+const UserModel = require('../model/UserModel');
+module.exports = class UserService extends DefaultService {
+  constructor() {
+    // format 代表数据库字段格式到显示字段，此处为数据库使用下划线格式，前台使用驼峰格式
+    super(UserModel, { format: 'Line2Camel' });
+  }
+
+  async list(ctx, params = {}, opts = {}) {
+    ctx.body = ctx.result(await super.list(ctx, params, opts));
+  }
+
+  async login(ctx, params = {}, opts = {}) {
+    try {
+      // 业务逻辑
+    } catch (e) {
+      if (this.error_custom) {
+        throw new Error(this.error_message);
+      } else {
+        throw e;
+      }
+    }
+  }
+};
+
+// server/api/user.js
+const { GET, POST, AUTH, filterNullProps } = require('@eside/leopold');
+const UserService = require('@server/services/UserService');
+module.exports = {
+  list: POST(async (ctx) => {
+    const finalParams = filterNullProps(Object.assign({}, ctx.request.body));
+    await userService.list(ctx, finalParams);
+  }),
+  get: GET(async (ctx) => {
+    const finalParams = filterNullProps(Object.assign({}, ctx.request.query));
+    await userService.listOne(ctx, finalParams);
+  })
+};
 ```
 
 ## fix记录
@@ -678,3 +286,5 @@ module.exports = UserModel;
   - 2024/06/22 修复动态路由，子属性为index的问题
   - 2024/06/22 补充动态路由的使用方法
   - 2024/06/23 补充Service字段转换内置,部分重置Service使用,提供DefaultService
+- 0.0.15
+  - 2024/06/24 移除DefaultService,交由Service做，将动作留给使用者决定。开放更多的常用方法类。

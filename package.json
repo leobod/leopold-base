@@ -1,12 +1,13 @@
 {
   "name": "@eside/leopold",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "",
   "publishConfig": {
     "access": "public"
   },
   "files": [
     "dist/",
+    "playground/",
     "README.md"
   ],
   "main": "./dist/index.js",

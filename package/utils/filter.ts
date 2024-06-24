@@ -20,4 +20,18 @@ const filterDbResult = (dbResult, filter) => {
   }
 };
 
-export { filterDbResult };
+/**
+ * 过滤对象中的null属性
+ * @param obj
+ * @returns {{}}
+ */
+const filterNullProps = (obj) => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value !== null) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+};
+
+export { filterDbResult, filterNullProps };
