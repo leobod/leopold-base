@@ -14,14 +14,10 @@ import _ from 'lodash';
 export class Service {
   model: SQLModel;
   format: string;
-  format_key: boolean;
   error_custom: boolean;
   error_message: string;
   page_num_key: string;
   page_size_key: string;
-  order_by_has: boolean;
-  order_by_key: string;
-  order_by_val: any;
   update_time_modify: boolean;
   update_time_key: string;
   soft_remove_key: string;
@@ -32,14 +28,13 @@ export class Service {
     model: SQLModel,
     opts = {
       format: 'Origin', // 可选 Origin, Camel2Line, Line2Camel
-      format_key: true,
       error_custom: true,
       error_message: 'Unknown Error',
       page_num_key: 'page_num',
       page_size_key: 'page_size',
       order_by_has: true,
       order_by_key: 'create_at',
-      order_by_val: 'DESC',
+      order_by_val: 'ASC',
       update_time_modify: true,
       update_time_key: 'update_at',
       soft_remove_key: 'state',
@@ -52,14 +47,10 @@ export class Service {
       {},
       {
         format: 'Origin', // 可选 Origin, Camel2Line, Line2Camel
-        format_key: true,
         error_custom: true,
         error_message: 'Unknown Error',
         page_num_key: 'page_num',
         page_size_key: 'page_size',
-        order_by_has: true,
-        order_by_key: 'create_at',
-        order_by_val: 'DESC',
         update_time_modify: true,
         update_time_key: 'update_at',
         soft_remove_key: 'state',
@@ -69,28 +60,15 @@ export class Service {
       opts
     );
     this.format = finalOpts.format || 'Origin';
-    this.format_key = finalOpts.format_key;
     this.error_custom = finalOpts.error_custom;
     this.error_message = finalOpts.error_message;
-    this.order_by_has = finalOpts.order_by_has;
-    this.order_by_val = finalOpts.order_by_val;
     this.update_time_modify = finalOpts.update_time_modify;
     this.soft_remove_val = finalOpts.soft_remove_val;
-    if (this.format_key) {
-      this.page_num_key = formatKeyCase(finalOpts.page_num_key, this.format);
-      this.page_size_key = formatKeyCase(finalOpts.page_size_key, this.format);
-      this.order_by_key = formatKeyCase(finalOpts.order_by_key, this.format);
-      this.update_time_key = formatKeyCase(finalOpts.update_time_key, this.format);
-      this.soft_remove_key = formatKeyCase(finalOpts.soft_remove_key, this.format);
-      this.pk = finalOpts.pk;
-    } else {
-      this.page_num_key = finalOpts.page_num_key;
-      this.page_size_key = finalOpts.page_size_key;
-      this.order_by_key = finalOpts.order_by_key;
-      this.update_time_key = finalOpts.update_time_key;
-      this.soft_remove_key = finalOpts.soft_remove_key;
-      this.pk = finalOpts.pk;
-    }
+    this.page_num_key = formatKeyCase(finalOpts.page_num_key, this.format);
+    this.page_size_key = formatKeyCase(finalOpts.page_size_key, this.format);
+    this.update_time_key = formatKeyCase(finalOpts.update_time_key, this.format);
+    this.soft_remove_key = formatKeyCase(finalOpts.soft_remove_key, this.format);
+    this.pk = formatKeyCase(finalOpts.pk, this.format);
   }
   /**
    * 创建表格
@@ -137,8 +115,15 @@ export class Service {
    * @param opts
    * @returns {Promise<*>}
    */
-  async list(ctx: Context, params = {}, opts = {}): Promise<any> {
+  async list(
+    ctx: Context,
+    params = {},
+    opts = { order_by_has: true, order_by_key: 'create_at', order_by_val: 'ASC' }
+  ): Promise<any> {
     const { page_num_key, page_size_key } = this;
+    const order_by_has = opts.order_by_has;
+    const order_by_key = formatKeyCase(opts.order_by_key || 'create_at', this.format);
+    const order_by_val = formatKeyCase(opts.order_by_val || 'ASC', this.format);
     const { model } = this;
     try {
       const page_num = params[page_num_key];
@@ -158,11 +143,21 @@ export class Service {
         total_page,
         total_size
       };
-      const sql = model
-        .select(['*'])
-        .where(reverseFormatObjCase(params, this.format))
-        .page(page_num, page_size)
-        .toSql();
+      let sql: any = { sql: '', bindings: [] };
+      if (order_by_has) {
+        sql = model
+          .select(['*'])
+          .where(reverseFormatObjCase(params, this.format))
+          .page(page_num, page_size)
+          .orderBy(reverseFormatKeyCase(order_by_key, this.format), order_by_val)
+          .toSql();
+      } else {
+        sql = model
+          .select(['*'])
+          .where(reverseFormatObjCase(params, this.format))
+          .page(page_num, page_size)
+          .toSql();
+      }
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
       const userFilter = model._filter || {};
       res.list = filterDbResult(dbResult, userFilter);
@@ -183,8 +178,14 @@ export class Service {
    * @param opts
    * @returns {Promise<*>}
    */
-  async listOne(ctx: Context, params = {}, opts = {}): Promise<any> {
-    const { order_by_has, order_by_key, order_by_val } = this;
+  async listOne(
+    ctx: Context,
+    params = {},
+    opts = { order_by_has: true, order_by_key: 'create_at', order_by_val: 'ASC' }
+  ): Promise<any> {
+    const order_by_has = opts.order_by_has;
+    const order_by_key = formatKeyCase(opts.order_by_key || 'create_at', this.format);
+    const order_by_val = formatKeyCase(opts.order_by_val || 'ASC', this.format);
     const { model } = this;
     try {
       let sql: any = { sql: '', bindings: [] };
