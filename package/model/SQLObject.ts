@@ -53,11 +53,11 @@ const toQsv = function (model) {
         bindings.push(...item.bindings);
       }
       sql.push(whereSql.join(' '));
-      if (model.raws.length > 0) {
-        sql.push(model.raws.join(' '));
-      }
       if (model.orders.length > 0) {
         sql.push('ORDER BY ' + model.orders.join(', '));
+      }
+      if (model.raws.length > 0) {
+        sql.push(model.raws.join(' '));
       }
       break;
     case 'INSERT':
@@ -77,11 +77,11 @@ const toQsv = function (model) {
         bindings.push(...item.bindings);
       }
       sql.push(whereSql.join(' '));
-      if (model.raws.length > 0) {
-        sql.push(model.raws.join(' '));
-      }
       if (model.orders.length > 0) {
         sql.push('ORDER BY ' + model.orders.join(', '));
+      }
+      if (model.raws.length > 0) {
+        sql.push(model.raws.join(' '));
       }
       break;
     case 'DELETE':
@@ -95,11 +95,11 @@ const toQsv = function (model) {
         bindings.push(...item.bindings);
       }
       sql.push(whereSql.join(' '));
-      if (model.raws.length > 0) {
-        sql.push(model.raws.join(' '));
-      }
       if (model.orders.length > 0) {
         sql.push('ORDER BY ' + model.orders.join(', '));
+      }
+      if (model.raws.length > 0) {
+        sql.push(model.raws.join(' '));
       }
       break;
     default:
