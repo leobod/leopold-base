@@ -27,7 +27,7 @@ const filterDbResult = (dbResult, filter) => {
  */
 const filterNullProps = (obj) => {
   return Object.entries(obj).reduce((acc, [key, value]) => {
-    if (value !== null) {
+    if (value !== null && value !== '') {
       acc[key] = value;
     }
     return acc;

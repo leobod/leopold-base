@@ -286,6 +286,8 @@ module.exports = {
   - 2024/06/22 修复动态路由，子属性为index的问题
   - 2024/06/22 补充动态路由的使用方法
   - 2024/06/23 补充Service字段转换内置,部分重置Service使用,提供DefaultService
-- 0.0.19
+- 0.0.20
   - 2024/06/24 移除DefaultService,交由Service做，将动作留给使用者决定。开放更多的常用方法类。
-  - 2024/06/25 Service中OrderBy优化,修复OrderBy使用后SQl语句顺序问题
+  - 2024/06/25 Service中OrderBy优化
+  - 2024/06/25 修复OrderBy使用后SQl语句顺序问题
+  - 2024/06/25 修复空值过滤
