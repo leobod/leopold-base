@@ -9,7 +9,7 @@ const getSqlModel = function () {
     columns: [],
     values: [],
     wheres: [],
-    // joins: [],
+    joins: [], // { type: 'LEFT JOIN', ref: '', where: '' }
     // unions: [],
     orders: [],
     raws: [],
@@ -44,6 +44,9 @@ const toQsv = function (model) {
       sql.push(model.query.join(' '));
       sql.push(model.columns.join(', '));
       sql.push('FROM ' + model.table.join(', '));
+      if (model.joins.length > 0) {
+        sql.push(model.joins.join(' '))
+      }
       for (const item of model.wheres) {
         if (whereSql.length === 0) {
           whereSql.push(`WHERE ${item.sql}`);

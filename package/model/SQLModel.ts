@@ -123,14 +123,17 @@ class SQLModel {
       if (fields === '*') fieldKeyList = Object.keys(this._column);
       else fieldKeyList = [fields];
     }
-    const tableKeyList: Array<string> = [`\`${this._table}\``];
+    const tableKeyList: Array<string> = [`${this._table}`];
+    const joinKeyList: Array<string> = []
     for (const key of fieldKeyList) {
       const columnItem = this._column[key];
       if (columnItem) {
         const columnItemSql: Array<string> = [];
         if (columnItem.ref && columnItem.origin) {
-          if (tableKeyList.indexOf(`\`${columnItem.ref}\``) === -1) {
-            tableKeyList.push(`\`${columnItem.ref}\``);
+          if (tableKeyList.indexOf(`${columnItem.ref}`) === -1) {
+            if (joinKeyList.indexOf(`${columnItem.ref}`) === -1) {
+              joinKeyList.push(`${columnItem.ref}`)
+            }
           }
           columnItemSql.push(`${columnItem.ref}.${columnItem.origin}`);
         } else {
@@ -141,14 +144,17 @@ class SQLModel {
         this._sqlObject.columns.push(columnItemSql.join(' '));
       }
     }
-    for (const tableKey of tableKeyList) {
+    for (let i=0; i< tableKeyList.length; ++i) {
+      const tableKey = tableKeyList[i]
+      tableKeyList[i] = `\`${tableKey}\``;
+    }
+    for (let i=0; i< joinKeyList.length; ++i) {
+      const tableKey = joinKeyList[i]
       const tableRefWhere = this._ref[tableKey];
       if (tableRefWhere) {
-        this._sqlObject.wheres.push({
-          type: 'AND',
-          value: tableRefWhere
-        });
+        this._sqlObject.joins.push(`LEFT JOIN \`${tableKey}\` ON ${tableRefWhere}`)
       }
+      joinKeyList[i] = `\`${tableKey}\``;
     }
     this._sqlObject.table = tableKeyList;
     return this;
@@ -190,17 +196,6 @@ class SQLModel {
       const columnItem = this._column[key];
       const columnInfo = this.getColumnInfo(key);
       if (columnInfo.table) {
-        // 处理关联where
-        if (this._sqlObject.table.indexOf(`\`${columnInfo.table}\``) === -1) {
-          this._sqlObject.table.push(`\`${columnInfo.table}\``);
-          const tableRefWhere = this._ref[columnInfo.table];
-          if (tableRefWhere) {
-            this._sqlObject.wheres.push({
-              type: 'AND',
-              value: tableRefWhere
-            });
-          }
-        }
         // 处理当前字段where
         let columnOperate = columnItem.operate || '=';
         if (columnOperate instanceof Function) {

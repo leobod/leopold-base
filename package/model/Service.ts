@@ -9,7 +9,6 @@ import {
   reverseFormatKeyCase,
   reverseFormatObjCase
 } from '../utils/namecase';
-import _ from 'lodash';
 
 export class Service {
   model: SQLModel;
@@ -43,7 +42,7 @@ export class Service {
     }
   ) {
     this.model = model;
-    const finalOpts = _.merge(
+    const finalOpts = Object.assign(
       {},
       {
         format: 'Origin', // 可选 Origin, Camel2Line, Line2Camel
