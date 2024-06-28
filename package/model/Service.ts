@@ -228,7 +228,21 @@ export class Service {
     const rules = getRequiredRules(model);
     const [err, errMsg] = validateRules(saveParams, rules);
     if (!err) {
-      const sql = model.insert(saveParams).toSql();
+      /* FIXED 不存在的字段会自动过滤 */
+      const _column :Array<any> = []
+      // Object.keys(model._column);
+      for (const defKey in model._column) {
+        if (!model._column[defKey].ref) {
+          _column.push(defKey)
+        }
+      }
+      const modelObj = {};
+      for (const key in saveParams) {
+        if (_column.indexOf(key) !== -1) {
+          modelObj[key] = saveParams[key];
+        }
+      }
+      const sql = model.insert(modelObj).toSql();
       try {
         const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings);
         /* OkPacket { fieldCount: 0, affectedRows: 1, insertId: 0, serverStatus: 2,
@@ -266,7 +280,14 @@ export class Service {
       updateParams[update_time_key] = formatDate(new Date(), 'YYYY/MM/DD HH:mm:ss');
     }
     updateParams = reverseFormatObjCase(updateParams, this.format);
-    const _column = Object.keys(model._column);
+    /* FIXED 不存在的字段会自动过滤 */
+    const _column :Array<any> = []
+    // Object.keys(model._column);
+    for (const defKey in model._column) {
+      if (!model._column[defKey].ref) {
+        _column.push(defKey)
+      }
+    }
     const modelObj = {};
     for (const key in updateParams) {
       if (_column.indexOf(key) !== -1) {

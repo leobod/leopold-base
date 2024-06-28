@@ -43,7 +43,7 @@ const toQsv = function (model) {
     case 'SELECT':
       sql.push(model.query.join(' '));
       sql.push(model.columns.join(', '));
-      sql.push('FROM ' + model.table.join(' '));
+      sql.push('FROM ' + model.table.join(', '));
       for (const item of model.wheres) {
         if (whereSql.length === 0) {
           whereSql.push(`WHERE ${item.sql}`);
