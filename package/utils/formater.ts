@@ -1,4 +1,4 @@
-import mysql from 'mysql';
+import mysql from 'mysql'
 
 /**
  * 格式化sql
@@ -6,7 +6,7 @@ import mysql from 'mysql';
  * @param params
  */
 const formatSql = function (sql, params) {
-  return mysql.format(sql, params);
-};
+  return mysql.format(sql, params)
+}
 
-export { formatSql };
+export { formatSql }

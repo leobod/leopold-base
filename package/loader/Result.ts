@@ -1,11 +1,11 @@
 export interface UniResponseResultType {
-  code: number;
-  msg: string;
-  data: any;
+  code: number
+  msg: string
+  data: any
 }
 
 export interface UniResponseType {
-  (data: any, msg?: string, code?: number): UniResponseResultType;
+  (data: any, msg?: string, code?: number): UniResponseResultType
 }
 
 const uniResponse: UniResponseType = function (
@@ -17,8 +17,8 @@ const uniResponse: UniResponseType = function (
     code,
     msg,
     data
-  };
-};
+  }
+}
 
 export const Result = {
   /**
@@ -28,10 +28,10 @@ export const Result = {
    * @param config
    */
   onLoad: function (root, app, config = {}) {
-    root.result = uniResponse;
+    root.result = uniResponse
     app.use(async (ctx, next) => {
-      ctx.result = uniResponse;
-      await next();
-    });
+      ctx.result = uniResponse
+      await next()
+    })
   }
-};
+}

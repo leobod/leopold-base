@@ -1,4 +1,4 @@
-import schedule from 'node-schedule';
+import schedule from 'node-schedule'
 
 /*
 *    *    *    *    *    *
@@ -51,7 +51,7 @@ schedule.gracefulShutdown();
  */
 
 export class ScheduleManager {
-  public list: any = {};
+  public list: any = {}
 
   constructor() {}
 
@@ -63,10 +63,10 @@ export class ScheduleManager {
    */
   createJob(name, rule, method) {
     if (this.list[name]) {
-      this.list[name].cancel();
+      this.list[name].cancel()
     }
-    this.list[name] = schedule.scheduleJob(name, rule, method);
-    return this.list[name];
+    this.list[name] = schedule.scheduleJob(name, rule, method)
+    return this.list[name]
   }
   /**
    * 停止指定Job
@@ -74,21 +74,21 @@ export class ScheduleManager {
    */
   stopJob(name) {
     if (this.list[name]) {
-      this.list[name].cancel();
-      return true;
+      this.list[name].cancel()
+      return true
     }
-    return false;
+    return false
   }
 }
 
 class ScheduleFactory {
-  public static instance: ScheduleManager | null = null;
+  public static instance: ScheduleManager | null = null
 
   public static onCreate = function (config = {}) {
-    const instance: ScheduleManager = new ScheduleManager();
-    ScheduleFactory.instance = instance;
-    return instance;
-  };
+    const instance: ScheduleManager = new ScheduleManager()
+    ScheduleFactory.instance = instance
+    return instance
+  }
 }
 
-export { ScheduleFactory };
+export { ScheduleFactory }

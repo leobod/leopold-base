@@ -1,4 +1,4 @@
-const p = require('path');
+const p = require('path')
 
 module.exports = {
   path: '.',
@@ -66,7 +66,7 @@ module.exports = {
       match: '/',
       opts: {
         filter: function (content_type) {
-          return /text/i.test(content_type);
+          return /text/i.test(content_type)
         },
         threshold: 2048,
         flush: require('zlib').Z_SYNC_FLUSH
@@ -85,8 +85,11 @@ module.exports = {
       mapping: '/server/template',
       opts: { extension: 'ejs' }
     },
+    DynamicServices: {
+      opts: [{ dir: '/server/services' }]
+    },
     DynamicRoutes: {
       opts: [{ match: '/api/', dir: '/server/api' }]
     }
   }
-};
+}

@@ -1,4 +1,4 @@
-import pathMatch from 'path-match';
+import pathMatch from 'path-match'
 
 // 示例用法
 // const prefix = '/api';
@@ -7,12 +7,12 @@ import pathMatch from 'path-match';
 
 const routePrefixToRegex = function (prefix) {
   // 对于特殊字符进行转义，例如：'/' -> '\/'
-  const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   // 构建正则表达式
-  const regexStr = `^${escapedPrefix}`;
+  const regexStr = `^${escapedPrefix}`
   // 返回对应的正则表达式对象
-  return new RegExp(regexStr);
-};
+  return new RegExp(regexStr)
+}
 
 const routePrefixMather = function (match) {
   const matcher = pathMatch({
@@ -20,8 +20,8 @@ const routePrefixMather = function (match) {
     sensitive: false,
     strict: true,
     end: false
-  })(match);
-  return matcher;
-};
+  })(match)
+  return matcher
+}
 
-export { routePrefixToRegex, routePrefixMather };
+export { routePrefixToRegex, routePrefixMather }

@@ -1,13 +1,13 @@
-import { isEmpty } from '../utils/obj';
-import nodemailer from 'nodemailer';
+import { isEmpty } from '../utils/obj'
+import nodemailer from 'nodemailer'
 
 class MailSender {
-  private config: any;
-  private mailer: any;
-  private name: String | null = null;
+  private config: any
+  private mailer: any
+  private name: String | null = null
 
   constructor(config = {}, name = null) {
-    this.name = name;
+    this.name = name
     const emailConfigTemplate = {
       host: '',
       port: '',
@@ -16,14 +16,14 @@ class MailSender {
         pass: '' //表示授权码.授权码获取方式在后面
       },
       secure: false
-    };
-    this.config = Object.assign({}, emailConfigTemplate, config);
-    this.config.secure = Number(this.config.port) === 465;
-    this.mailer = nodemailer.createTransport(this.config);
+    }
+    this.config = Object.assign({}, emailConfigTemplate, config)
+    this.config.secure = Number(this.config.port) === 465
+    this.mailer = nodemailer.createTransport(this.config)
   }
 
   set(key, val) {
-    this[key] = val;
+    this[key] = val
   }
 
   /**
@@ -45,60 +45,60 @@ class MailSender {
         : this.config.auth.user /* 发件邮箱 */,
       to: tolist /* 接收方 */,
       subject: subject // 主题
-    };
-    cclist && (mailOptions['cc'] = cclist);
-    text && (mailOptions['text'] = text);
-    html && (mailOptions['html'] = html);
+    }
+    cclist && (mailOptions['cc'] = cclist)
+    text && (mailOptions['text'] = text)
+    html && (mailOptions['html'] = html)
     if (attachments && attachments !== this.isJSON(JSON.stringify(attachments))) {
-      mailOptions['attachments'] = attachments;
+      mailOptions['attachments'] = attachments
     }
     // 发送邮件
-    const res = await this.mailer.sendMail(mailOptions);
-    return res;
+    const res = await this.mailer.sendMail(mailOptions)
+    return res
   }
 
   isJSON(str) {
     if (typeof str == 'string') {
       try {
-        const obj = JSON.parse(str);
-        return typeof obj == 'object' && obj;
+        const obj = JSON.parse(str)
+        return typeof obj == 'object' && obj
       } catch (e) {
-        return false;
+        return false
       }
     }
   }
 }
 
 export interface MailManagerDef {
-  [key: string]: MailSender | any;
+  [key: string]: MailSender | any
 }
 
 export class MailManager implements MailManagerDef {
   constructor() {}
 
   setMail(key, value) {
-    this[key] = value;
+    this[key] = value
   }
   getMail(key, value) {
-    return this[key];
+    return this[key]
   }
 }
 
 class MailFactory {
-  public static instance: MailManager | null = null;
+  public static instance: MailManager | null = null
   public static onCreate(config = {}) {
-    const mailManager = new MailManager();
+    const mailManager = new MailManager()
     if (!isEmpty(config)) {
       for (const key in config) {
-        const item = config[key];
+        const item = config[key]
         if (item.type === 'NODEMAILER' && !isEmpty(item.config)) {
-          mailManager.setMail(key, new MailSender(item.config, item.name));
+          mailManager.setMail(key, new MailSender(item.config, item.name))
         }
       }
     }
-    MailFactory.instance = mailManager;
-    return mailManager;
+    MailFactory.instance = mailManager
+    return mailManager
   }
 }
 
-export { MailSender, MailFactory };
+export { MailSender, MailFactory }

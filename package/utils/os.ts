@@ -1,15 +1,15 @@
-import os from 'os';
+import os from 'os'
 
 const isWin = () => {
-  return os.type() === 'Windows_NT';
-};
+  return os.type() === 'Windows_NT'
+}
 
 const isMac = () => {
-  return os.type() === 'Windows_NT';
-};
+  return os.type() === 'Windows_NT'
+}
 
 const isLinux = () => {
-  return os.type() === 'Linux';
-};
+  return os.type() === 'Linux'
+}
 
-export { isWin, isMac, isLinux };
+export { isWin, isMac, isLinux }

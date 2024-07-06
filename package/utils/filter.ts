@@ -8,17 +8,17 @@ const filterDbResult = (dbResult, filter) => {
   if (dbResult) {
     return dbResult.map((item) => {
       for (const key in filter) {
-        const filterFn = filter[key];
+        const filterFn = filter[key]
         if (item[key] !== undefined && item[key] !== null) {
-          item[key] = filterFn(item[key], item) || item[key];
+          item[key] = filterFn(item[key], item) || item[key]
         }
       }
-      return item;
-    });
+      return item
+    })
   } else {
-    return [];
+    return []
   }
-};
+}
 
 /**
  * 过滤对象中的null属性
@@ -28,10 +28,10 @@ const filterDbResult = (dbResult, filter) => {
 const filterNullProps = (obj) => {
   return Object.entries(obj).reduce((acc, [key, value]) => {
     if (value !== null && value !== '') {
-      acc[key] = value;
+      acc[key] = value
     }
-    return acc;
-  }, {});
-};
+    return acc
+  }, {})
+}
 
-export { filterDbResult, filterNullProps };
+export { filterDbResult, filterNullProps }

@@ -1,13 +1,13 @@
-import { WebSocketServer } from 'ws';
+import { WebSocketServer } from 'ws'
 
 class WebsocketFactory {
-  public static instance: WebSocketServer | null = null;
+  public static instance: WebSocketServer | null = null
 
   static onCreate = function (server) {
-    const wss: WebSocketServer = new WebSocketServer({ server: server });
-    WebsocketFactory.instance = wss;
-    return wss;
-  };
+    const wss: WebSocketServer = new WebSocketServer({ server: server })
+    WebsocketFactory.instance = wss
+    return wss
+  }
 }
 
-export { WebsocketFactory };
+export { WebsocketFactory }

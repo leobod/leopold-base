@@ -1,9 +1,9 @@
-import { isEmpty } from '../utils/obj';
-import { routePrefixMather } from '../utils/routeMatch';
+import { isEmpty } from '../utils/obj'
+import { routePrefixMather } from '../utils/routeMatch'
 
 interface CorsConfig {
-  match?: string;
-  opts?: Object;
+  match?: string
+  opts?: Object
 }
 
 export const Cors = {
@@ -14,22 +14,22 @@ export const Cors = {
    * @param config
    */
   onLoad: function (root, app, config: CorsConfig = {}) {
-    const { match = '/', opts = {} } = config;
-    const matcher = routePrefixMather(match);
+    const { match = '/', opts = {} } = config
+    const matcher = routePrefixMather(match)
     app.use(async (ctx, next) => {
       if (matcher(ctx.url)) {
         if (!isEmpty(opts)) {
           for (const key in opts) {
-            const val = opts[key];
-            ctx.set(key, val);
+            const val = opts[key]
+            ctx.set(key, val)
           }
         }
         if (ctx.method == 'OPTIONS') {
-          ctx.body = 200;
+          ctx.body = 200
         } else {
-          await next();
+          await next()
         }
       }
-    });
+    })
   }
-};
+}

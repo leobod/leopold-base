@@ -1,11 +1,11 @@
-import p from 'path';
-import KoaMount from 'koa-mount';
-import KoaStatic from 'koa-static';
+import p from 'path'
+import KoaMount from 'koa-mount'
+import KoaStatic from 'koa-static'
 
 interface AssetsConfig {
-  match?: string;
-  mapping?: string;
-  opts?: Object;
+  match?: string
+  mapping?: string
+  opts?: Object
 }
 
 export const Assets = {
@@ -16,7 +16,7 @@ export const Assets = {
    * @param config  { path, mapping, opts }
    */
   onLoad: function (root, app, config: AssetsConfig = {}) {
-    const { match = '/', mapping = './static', opts = {} } = config;
+    const { match = '/', mapping = './static', opts = {} } = config
     const assetsOpts = Object.assign(
       {},
       // {
@@ -25,7 +25,7 @@ export const Assets = {
       //   defer: false
       // },
       opts
-    );
-    app.use(KoaMount(match, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)));
+    )
+    app.use(KoaMount(match, KoaStatic(p.join(process.cwd(), mapping), assetsOpts)))
   }
-};
+}

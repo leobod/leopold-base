@@ -1,4 +1,4 @@
-import { MailFactory } from '../plugin/MailFactory';
+import { MailFactory } from '../plugin/MailFactory'
 
 export const Mail = {
   /**
@@ -8,10 +8,10 @@ export const Mail = {
    * @param config
    */
   onLoad: function (root, app, config = {}) {
-    root.mail = MailFactory.onCreate(config);
+    root.mail = MailFactory.onCreate(config)
     app.use(async (ctx, next) => {
-      ctx.mail = root.mail;
-      await next();
-    });
+      ctx.mail = root.mail
+      await next()
+    })
   }
-};
+}

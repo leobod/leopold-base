@@ -1,4 +1,4 @@
-import { WebsocketFactory } from '../plugin/WebsocketFactory';
+import { WebsocketFactory } from '../plugin/WebsocketFactory'
 
 export const Websocket = {
   /**
@@ -8,10 +8,10 @@ export const Websocket = {
    * @param config
    */
   onLoad: function (root, app, config = {}) {
-    root.wss = WebsocketFactory.onCreate(root.server);
+    root.wss = WebsocketFactory.onCreate(root.server)
     app.use(async (ctx, next) => {
-      ctx.wss = root.wss;
-      await next();
-    });
+      ctx.wss = root.wss
+      await next()
+    })
   }
-};
+}

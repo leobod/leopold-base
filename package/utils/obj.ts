@@ -1,5 +1,15 @@
 const isEmpty = (obj) => {
-  return Object.keys(obj).length === 0;
-};
+  return Object.keys(obj).length === 0
+}
 
-export { isEmpty };
+const isSubclassOf = (Subclass, Superclass) => {
+  while (Subclass) {
+    if (Subclass === Superclass) {
+      return true
+    }
+    Subclass = Object.getPrototypeOf(Subclass.prototype)
+  }
+  return false
+}
+
+export { isEmpty, isSubclassOf }

@@ -1,9 +1,9 @@
-const views = require('koa-views');
-const p = require('path');
+const views = require('koa-views')
+const p = require('path')
 
 interface TemplateHandlerConfig {
-  mapping?: string;
-  opts?: Object;
+  mapping?: string
+  opts?: Object
 }
 
 export const TemplateHandler = {
@@ -14,8 +14,8 @@ export const TemplateHandler = {
    * @param config
    */
   onLoad: function (root, app, config: TemplateHandlerConfig = {}) {
-    const { mapping = './template', opts = {} } = config;
-    const finalOpts = Object.assign({}, opts);
-    app.use(views(p.join(process.cwd(), mapping), finalOpts));
+    const { mapping = './template', opts = {} } = config
+    const finalOpts = Object.assign({}, opts)
+    app.use(views(p.join(process.cwd(), mapping), finalOpts))
   }
-};
+}

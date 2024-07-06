@@ -118,6 +118,9 @@ module.exports = {
       mapping: '/server/template',
       opts: { extension: 'ejs' }
     },
+    DynamicServices: {
+      opts: [{ dir: '/server/services' }]
+    },
     DynamicRoutes: {
       opts: [{ match: '/api/', dir: '/server/api' }]
     }
@@ -293,3 +296,5 @@ module.exports = {
   - 2024/06/25 修复空值过滤
 - 0.0.22
   - 2024/06/28 修复不存在的字段自动过滤 ，简单自然连接查询sql语句错误，简单自然连接改左连接
+- 0.0.24
+  - 2024/07/06 补充自动获取service

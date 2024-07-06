@@ -1,10 +1,10 @@
-import { routePrefixMather } from '../utils/routeMatch';
+import { routePrefixMather } from '../utils/routeMatch'
 
-const compress = require('koa-compress');
+const compress = require('koa-compress')
 
 interface CompressConfig {
-  match?: string;
-  opts?: Object;
+  match?: string
+  opts?: Object
 }
 
 export const Compress = {
@@ -15,15 +15,15 @@ export const Compress = {
    * @param config
    */
   onLoad: function (root, app, config: CompressConfig = {}) {
-    const { match = '/', opts = {} } = config;
-    const matcher = routePrefixMather(match);
-    const finalOpts = Object.assign({}, opts);
+    const { match = '/', opts = {} } = config
+    const matcher = routePrefixMather(match)
+    const finalOpts = Object.assign({}, opts)
     app.use(async (ctx, next) => {
       if (matcher(ctx.url)) {
-        await compress(finalOpts)(ctx, next);
+        await compress(finalOpts)(ctx, next)
       } else {
-        await next();
+        await next()
       }
-    });
+    })
   }
-};
+}
