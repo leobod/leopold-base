@@ -58,7 +58,7 @@ class Leopold {
     Leopold.instance = this
   }
 
-  async load(arrs: Array<string> | string = 'default', config = {}) {
+  load(arrs: Array<string> | string = 'default', config = {}) {
     const defaultMiddlewares = [
       'AppLog',
       'Mail',
@@ -87,7 +87,7 @@ class Leopold {
     }
     for (const key of willLoadedKeys) {
       const finalConfig = Object.assign({}, modulesConfig[key], config)
-      await modules[key].onLoad(this, this.app, finalConfig)
+      modules[key].onLoad(this, this.app, finalConfig)
     }
   }
 

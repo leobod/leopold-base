@@ -5,11 +5,7 @@ interface DynamicServicesConfig {
   opts: Array<{ dir: string }>
 }
 
-const getServicesFilePath = async (
-  root,
-  app,
-  config: DynamicServicesConfig = { opts: [] }
-) => {
+const getServicesFilePath = (root, app, config: DynamicServicesConfig = { opts: [] }) => {
   const { opts } = config
   const servicesList = opts ? opts : []
   for (const item of servicesList) {
@@ -36,9 +32,9 @@ export const DynamicServices = {
    * @param app
    * @param config
    */
-  onLoad: async function (root, app, config: DynamicServicesConfig = { opts: [] }) {
+  onLoad: function (root, app, config: DynamicServicesConfig = { opts: [] }) {
     root.service = new Map()
-    await getServicesFilePath(root, app, config)
+    getServicesFilePath(root, app, config)
     app.use(async (ctx, next) => {
       ctx.service = root.service
       await next()

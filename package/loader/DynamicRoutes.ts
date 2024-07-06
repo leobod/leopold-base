@@ -10,11 +10,7 @@ interface DynamicRoutesFn {
   (ctx: any): void
 }
 
-const getRenderFilePath = async (
-  root,
-  app,
-  config: DynamicRoutesConfig = { opts: [] }
-) => {
+const getRenderFilePath = (root, app, config: DynamicRoutesConfig = { opts: [] }) => {
   const { opts } = config
   const routeList = opts ? opts : []
   let routeFileList: Array<any> = []
@@ -97,8 +93,8 @@ export const DynamicRoutes = {
    * @param app
    * @param config
    */
-  onLoad: async function (root, app, config: DynamicRoutesConfig = { opts: [] }) {
-    await getRenderFilePath(root, app, config)
+  onLoad: function (root, app, config: DynamicRoutesConfig = { opts: [] }) {
+    getRenderFilePath(root, app, config)
     app.use(renderMatch)
   }
 }
