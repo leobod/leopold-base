@@ -90,14 +90,14 @@ const ModuleModel = new SQLModel({
 
 describe('[SQLModel].select.Ref3', () => {
   test(`module.select('*')_ref3`, () => {
-    let sql = `SELECT tb_module.code AS \`code\`, tb_module.fk_group AS \`fk_group\`, tb_module.key AS \`key\`, tb_module.name AS \`name\`, tb_module.type AS \`type\`, tb_module.audits AS \`audits\`, tb_module.is_group AS \`is_group\`, tb_module.fk_parent AS \`fk_parent\`, tb_module.name AS \`fk_parent_name\`, tb_module.is_show AS \`is_show\`, tb_module.module_level AS \`module_level\`, tb_module.state AS \`state\`, tb_module.update_at AS \`update_at\`, tb_module.create_at AS \`create_at\` FROM \`tb_module\` LEFT JOIN \`tb_module\` as \`tb_module_parent\` ON tb_module.fk_parent = tb_module.code ;`
+    let sql = `SELECT tb_module.code AS \`code\`, tb_module.fk_group AS \`fk_group\`, tb_module.key AS \`key\`, tb_module.name AS \`name\`, tb_module.type AS \`type\`, tb_module.audits AS \`audits\`, tb_module.is_group AS \`is_group\`, tb_module.fk_parent AS \`fk_parent\`, tb_module_parent.name AS \`fk_parent_name\`, tb_module.is_show AS \`is_show\`, tb_module.module_level AS \`module_level\`, tb_module.state AS \`state\`, tb_module.update_at AS \`update_at\`, tb_module.create_at AS \`create_at\` FROM \`tb_module\` LEFT JOIN \`tb_module\` as \`tb_module_parent\` ON tb_module.fk_parent = tb_module.code ;`
     const searchForm = {}
     const current = ModuleModel.select('*').where(searchForm).toSql()
     expect(current.sql).toBe(sql)
   })
 
   test(`module.select('*')_ref3_withSearchForm`, () => {
-    let sql = `SELECT tb_module.code AS \`code\`, tb_module.fk_group AS \`fk_group\`, tb_module.key AS \`key\`, tb_module.name AS \`name\`, tb_module.type AS \`type\`, tb_module.audits AS \`audits\`, tb_module.is_group AS \`is_group\`, tb_module.fk_parent AS \`fk_parent\`, tb_module.name AS \`fk_parent_name\`, tb_module.is_show AS \`is_show\`, tb_module.module_level AS \`module_level\`, tb_module.state AS \`state\`, tb_module.update_at AS \`update_at\`, tb_module.create_at AS \`create_at\` FROM \`tb_module\` LEFT JOIN \`tb_module\` as \`tb_module_parent\` ON tb_module.fk_parent = tb_module.code WHERE tb_module.type = ?;`
+    let sql = `SELECT tb_module.code AS \`code\`, tb_module.fk_group AS \`fk_group\`, tb_module.key AS \`key\`, tb_module.name AS \`name\`, tb_module.type AS \`type\`, tb_module.audits AS \`audits\`, tb_module.is_group AS \`is_group\`, tb_module.fk_parent AS \`fk_parent\`, tb_module_parent.name AS \`fk_parent_name\`, tb_module.is_show AS \`is_show\`, tb_module.module_level AS \`module_level\`, tb_module.state AS \`state\`, tb_module.update_at AS \`update_at\`, tb_module.create_at AS \`create_at\` FROM \`tb_module\` LEFT JOIN \`tb_module\` as \`tb_module_parent\` ON tb_module.fk_parent = tb_module.code WHERE tb_module.type = ?;`
     const searchForm = { type: 1 }
     const current = ModuleModel.select('*').where(searchForm).toSql()
     expect(current.sql).toBe(sql)
