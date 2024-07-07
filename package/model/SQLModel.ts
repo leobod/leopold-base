@@ -127,6 +127,7 @@ class SQLModel {
     }
     const tableKeyList: Array<string> = [`${this._table}`]
     const joinKeyList: Array<any> = []
+    const joinItemList: Array<any> = []
     for (const key of fieldKeyList) {
       const columnItem = this._column[key]
       if (columnItem) {
@@ -136,7 +137,8 @@ class SQLModel {
         const columnItemSql: Array<string> = []
         if (columnItem.ref && columnItem.ref_table && columnItem.origin) {
           if (joinKeyList.indexOf(`${columnItem.ref}`) === -1) {
-            joinKeyList.push({
+            joinKeyList.push(columnItem.ref)
+            joinItemList.push({
               ref_key: `${columnItem.ref}`,
               ref_table: `${columnItem.ref_table}`,
               ref_alias: `${ref_alias}`
@@ -155,8 +157,8 @@ class SQLModel {
       const tableKey = tableKeyList[i]
       tableKeyList[i] = `\`${tableKey}\``
     }
-    for (let i = 0; i < joinKeyList.length; ++i) {
-      const refItem = joinKeyList[i]
+    for (let i = 0; i < joinItemList.length; ++i) {
+      const refItem = joinItemList[i]
       const tableRefWhere = this._ref[refItem.ref_key]
       if (tableRefWhere) {
         this._sqlObject.joins.push(
