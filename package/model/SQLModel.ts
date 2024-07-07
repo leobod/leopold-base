@@ -16,6 +16,8 @@ class SQLModel {
       rawExpr?: any
       // 有ref 及为关联字段，或者别名字段
       ref?: any
+      ref_table?: any
+      ref_alias?: any
       origin?: any
       operate: any
     }
@@ -124,18 +126,20 @@ class SQLModel {
       else fieldKeyList = [fields]
     }
     const tableKeyList: Array<string> = [`${this._table}`]
-    const joinKeyList: Array<string> = []
+    const joinKeyList: Array<any> = []
     for (const key of fieldKeyList) {
       const columnItem = this._column[key]
       if (columnItem) {
         const columnItemSql: Array<string> = []
-        if (columnItem.ref && columnItem.origin) {
-          if (tableKeyList.indexOf(`${columnItem.ref}`) === -1) {
-            if (joinKeyList.indexOf(`${columnItem.ref}`) === -1) {
-              joinKeyList.push(`${columnItem.ref}`)
-            }
+        if (columnItem.ref && columnItem.ref_table && columnItem.origin) {
+          if (joinKeyList.indexOf(`${columnItem.ref}`) === -1) {
+            joinKeyList.push({
+              ref_key: `${columnItem.ref}`,
+              ref_table: `${columnItem.ref_table}`,
+              ref_alias: `${columnItem.ref_alias ? columnItem.ref_alias : columnItem.ref_table}`
+            })
           }
-          columnItemSql.push(`${columnItem.ref}.${columnItem.origin}`)
+          columnItemSql.push(`${columnItem.ref_table}.${columnItem.origin}`)
         } else {
           columnItemSql.push(`${this._table}.${key}`)
         }
@@ -149,12 +153,13 @@ class SQLModel {
       tableKeyList[i] = `\`${tableKey}\``
     }
     for (let i = 0; i < joinKeyList.length; ++i) {
-      const tableKey = joinKeyList[i]
-      const tableRefWhere = this._ref[tableKey]
+      const refItem = joinKeyList[i]
+      const tableRefWhere = this._ref[refItem.ref_key]
       if (tableRefWhere) {
-        this._sqlObject.joins.push(`LEFT JOIN \`${tableKey}\` ON ${tableRefWhere}`)
+        this._sqlObject.joins.push(
+          `${tableRefWhere.JOIN} \`${refItem.ref_table}\` as \`${refItem.ref_alias}\` ON ${tableRefWhere.ON}`
+        )
       }
-      joinKeyList[i] = `\`${tableKey}\``
     }
     this._sqlObject.table = tableKeyList
     return this

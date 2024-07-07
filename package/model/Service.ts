@@ -122,12 +122,18 @@ export class Service extends ServiceDef {
   async list(
     ctx: Context,
     params = {},
-    opts = { order_by_has: true, order_by_key: 'create_at', order_by_val: 'ASC' }
+    opts = {
+      order_by_has: true,
+      order_by_key: 'create_at',
+      order_by_val: 'ASC',
+      table_column: ['*']
+    }
   ): Promise<any> {
     const { page_num_key, page_size_key } = this
     const order_by_has = opts.order_by_has
     const order_by_key = formatKeyCase(opts.order_by_key || 'create_at', this.format)
     const order_by_val = formatKeyCase(opts.order_by_val || 'ASC', this.format)
+    const table_column = opts.table_column || ['*']
     const { model } = this
     try {
       const page_num = params[page_num_key]
@@ -150,14 +156,14 @@ export class Service extends ServiceDef {
       let sql: any = { sql: '', bindings: [] }
       if (order_by_has) {
         sql = model
-          .select(['*'])
+          .select(table_column)
           .where(reverseFormatObjCase(params, this.format))
           .page(page_num, page_size)
           .orderBy(reverseFormatKeyCase(order_by_key, this.format), order_by_val)
           .toSql()
       } else {
         sql = model
-          .select(['*'])
+          .select(table_column)
           .where(reverseFormatObjCase(params, this.format))
           .page(page_num, page_size)
           .toSql()
@@ -185,22 +191,28 @@ export class Service extends ServiceDef {
   async listOne(
     ctx: Context,
     params = {},
-    opts = { order_by_has: true, order_by_key: 'create_at', order_by_val: 'ASC' }
+    opts = {
+      order_by_has: true,
+      order_by_key: 'create_at',
+      order_by_val: 'ASC',
+      table_column: ['*']
+    }
   ): Promise<any> {
     const order_by_has = opts.order_by_has
     const order_by_key = formatKeyCase(opts.order_by_key || 'create_at', this.format)
     const order_by_val = formatKeyCase(opts.order_by_val || 'ASC', this.format)
+    const table_column = opts.table_column || ['*']
     const { model } = this
     try {
       let sql: any = { sql: '', bindings: [] }
       if (order_by_has) {
         sql = model
-          .select(['*'])
+          .select(table_column)
           .where(reverseFormatObjCase(params, this.format))
           .orderBy(reverseFormatKeyCase(order_by_key, this.format), order_by_val)
           .toSql()
       } else {
-        sql = model.select(['*']).where(params).toSql()
+        sql = model.select(table_column).where(params).toSql()
       }
       const dbResult = await ctx.db.mysql.query(sql.sql, sql.bindings)
       const userFilter = model._filter || {}

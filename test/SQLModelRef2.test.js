@@ -1,4 +1,4 @@
-const { SQLModel, SQLModelType, formatSql } = require('../dist/index');
+const { SQLModel, SQLModelType, formatSql } = require('../dist/index')
 
 const User = new SQLModel({
   table: 'tb_user',
@@ -25,6 +25,7 @@ const User = new SQLModel({
     },
     department_name: {
       ref: 'tb_department',
+      ref_table: 'tb_department',
       origin: 'name'
     },
     account: {
@@ -82,22 +83,25 @@ const User = new SQLModel({
     }
   },
   ref: {
-    'tb_department': 'tb_department.code = tb_user.fk_department'
+    tb_department: {
+      JOIN: 'LEFT JOIN',
+      ON: 'tb_department.code = tb_user.fk_department'
+    }
   }
-});
+})
 
 describe('[SQLModel].select.Ref2', () => {
   test(`User.select('*')_ref2`, () => {
-    let sql = `SELECT tb_user.code AS \`code\`, tb_user.fk_group AS \`fk_group\`, tb_user.fk_department AS \`fk_department\`, tb_department.name AS \`department_name\`, tb_user.account AS \`account\`, tb_user.passwd AS \`passwd\`, tb_user.name AS \`name\`, tb_user.description AS \`description\`, tb_user.sex AS \`sex\`, tb_user.phone_area_code AS \`phone_area_code\`, tb_user.phone AS \`phone\`, tb_user.email AS \`email\`, tb_user.state AS \`state\`, tb_user.update_at AS \`update_at\`, tb_user.create_at AS \`create_at\` FROM \`tb_user\` LEFT JOIN \`tb_department\` ON tb_department.code = tb_user.fk_department ;`;
-    const searchForm = {};
-    const current = User.select('*').where(searchForm).toSql();
-    expect(current.sql).toBe(sql);
-  });
+    let sql = `SELECT tb_user.code AS \`code\`, tb_user.fk_group AS \`fk_group\`, tb_user.fk_department AS \`fk_department\`, tb_department.name AS \`department_name\`, tb_user.account AS \`account\`, tb_user.passwd AS \`passwd\`, tb_user.name AS \`name\`, tb_user.description AS \`description\`, tb_user.sex AS \`sex\`, tb_user.phone_area_code AS \`phone_area_code\`, tb_user.phone AS \`phone\`, tb_user.email AS \`email\`, tb_user.state AS \`state\`, tb_user.update_at AS \`update_at\`, tb_user.create_at AS \`create_at\` FROM \`tb_user\` LEFT JOIN \`tb_department\` as \`tb_department\` ON tb_department.code = tb_user.fk_department ;`
+    const searchForm = {}
+    const current = User.select('*').where(searchForm).toSql()
+    expect(current.sql).toBe(sql)
+  })
 
   test(`User.select('*')_ref2_where`, () => {
-    let sql = `SELECT tb_user.code AS \`code\`, tb_user.fk_group AS \`fk_group\`, tb_user.fk_department AS \`fk_department\`, tb_department.name AS \`department_name\`, tb_user.account AS \`account\`, tb_user.passwd AS \`passwd\`, tb_user.name AS \`name\`, tb_user.description AS \`description\`, tb_user.sex AS \`sex\`, tb_user.phone_area_code AS \`phone_area_code\`, tb_user.phone AS \`phone\`, tb_user.email AS \`email\`, tb_user.state AS \`state\`, tb_user.update_at AS \`update_at\`, tb_user.create_at AS \`create_at\` FROM \`tb_user\` LEFT JOIN \`tb_department\` ON tb_department.code = tb_user.fk_department WHERE tb_department.name = ?;`;
-    const searchForm = { department_name: '123' };
-    const current = User.select('*').where(searchForm).toSql();
-    expect(current.sql).toBe(sql);
-  });
+    let sql = `SELECT tb_user.code AS \`code\`, tb_user.fk_group AS \`fk_group\`, tb_user.fk_department AS \`fk_department\`, tb_department.name AS \`department_name\`, tb_user.account AS \`account\`, tb_user.passwd AS \`passwd\`, tb_user.name AS \`name\`, tb_user.description AS \`description\`, tb_user.sex AS \`sex\`, tb_user.phone_area_code AS \`phone_area_code\`, tb_user.phone AS \`phone\`, tb_user.email AS \`email\`, tb_user.state AS \`state\`, tb_user.update_at AS \`update_at\`, tb_user.create_at AS \`create_at\` FROM \`tb_user\` LEFT JOIN \`tb_department\` as \`tb_department\` ON tb_department.code = tb_user.fk_department WHERE tb_department.name = ?;`
+    const searchForm = { department_name: '123' }
+    const current = User.select('*').where(searchForm).toSql()
+    expect(current.sql).toBe(sql)
+  })
 })
