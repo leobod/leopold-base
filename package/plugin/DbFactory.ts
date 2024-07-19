@@ -27,6 +27,12 @@ class DbFactory {
         const item = config[key]
         if (item.type === 'MYSQL' && !isEmpty(item.config)) {
           dbManager.setDb(key, new MysqlRDB(item.config))
+          if (item.keepAlive) {
+            const mysqlKeepAlive = function () {
+              dbManager[key].ping()
+            }
+            dbManager[`${key}Timer`] = setInterval(mysqlKeepAlive, 60 * 1000)
+          }
         }
         if (item.type === 'REDIS' && !isEmpty(item.config)) {
           dbManager.setDb(key, new RedisRDB(item.config))

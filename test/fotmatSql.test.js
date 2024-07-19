@@ -34,4 +34,10 @@ describe('[formatSql]', () => {
         const current = formatSql('SELECT user.id AS id FROM user WHERE user.id BETWEEN ? AND ?;', ['10', '20']);
         expect(current).toBe(sql);
     });
+
+  test(`formatSql('SELECT user.id AS id FROM user WHERE user.id BETWEEN ? AND ?', ['10', '20'])`, () => {
+    const sql = `SELECT user.id AS id FROM user WHERE user.id BETWEEN '10' AND '20';`;
+    const current = formatSql('SELECT user.id AS id FROM user WHERE user.id BETWEEN ? AND ?;', ['10', '20']);
+    expect(current).toBe(sql);
+  });
 });

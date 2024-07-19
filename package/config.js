@@ -22,6 +22,7 @@ module.exports = {
     Db: {
       // mysql: {
       //   type: 'MYSQL',
+      //   keepAlive: false,
       //   config: {
       //     host: '42.192.233.200',
       //     port: '3306',

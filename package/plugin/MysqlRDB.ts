@@ -100,6 +100,20 @@ class MysqlRDB {
       })
     })
   }
+
+  ping() {
+    return new Promise((resolve, reject) => {
+      this.pool.getConnection((err, connection) => {
+        if (err) {
+          resolve(false)
+        } else {
+          connection.ping()
+          connection.release()
+          resolve(true)
+        }
+      })
+    })
+  }
 }
 
 export { MysqlRDB }

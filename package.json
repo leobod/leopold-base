@@ -1,6 +1,6 @@
 {
   "name": "@eside/leopold",
-  "version": "0.0.28",
+  "version": "0.0.30",
   "description": "",
   "publishConfig": {
     "access": "public"
