@@ -79,8 +79,11 @@ class MysqlRDB {
                   connection.commit((err) => {
                     //事务处理函数resolve则提交事务
                     if (err) {
-                      reject(err)
-                      connection.release()
+                      connection.rollback(() => {
+                        //事务处理函数reject则回滚事务
+                        reject(err)
+                        connection.release()
+                      })
                     } else {
                       resolve(result)
                       connection.release()

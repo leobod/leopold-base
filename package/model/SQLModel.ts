@@ -293,8 +293,9 @@ class SQLModel {
     return this
   }
 
-  orderBy(key, sort = 'ASC') {
-    this._sqlObject.orders.push(`${key} ${sort}`)
+  orderBy(key) {
+    // ASC(DEFAULT)
+    this._sqlObject.orders.push(`${key}`)
     return this
   }
 
